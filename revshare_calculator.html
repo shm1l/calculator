@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progressive Revenue Share Model Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+        
+        .notice {
+            background: #e3f2fd;
+            border: 1px solid #2196f3;
+            color: #0d47a1;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e0e0e0;
+        }
+        
+        .card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        .input-group label {
+            display: block;
+            color: #555;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+        
+        .result-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding: 8px 0;
+        }
+        
+        .result-item.highlight {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 6px;
+        }
+        
+        .result-item.total {
+            border-top: 2px solid rgba(255, 255, 255, 0.3);
+            padding-top: 15px;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        .breakdown-box {
+            background: #f0f4ff;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            color: #444;
+        }
+        
+        .formula-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .formula-box h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        
+        tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .highlight-row {
+            background: #e8f4f8 !important;
+            font-weight: 600;
+        }
+        
+        .disabled-row {
+            background: #f8f8f8;
+            color: #999;
+        }
+        
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .alert.show {
+            display: block;
+        }
+        
+        .alert.success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+        }
+        
+        .alert.warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Progressive Revenue Share Model</h1>
+        <p class="subtitle">Fair-share model ensuring both parties receive minimum $60K</p>
+        
+        <div class="notice">
+            <strong>ℹ️ Fair Share Principle:</strong> Minimum inventory exposure is 25% to ensure the client receives at least $60K (matching your base guarantee). This creates a balanced partnership where both parties benefit fairly.
+        </div>
+        
+        <div class="grid">
+            <div class="card">
+                <h3>Input Parameters</h3>
+                
+                <div class="input-group">
+                    <label>Inventory Exposure (%) - Min: 25%</label>
+                    <input type="number" id="inventory" min="25" max="100" step="5" value="50">
+                    <input type="range" id="inventorySlider" min="25" max="100" step="5" value="50">
+                </div>
+                
+                <div class="input-group">
+                    <label>Base Revenue (Before Share)</label>
+                    <input type="number" id="baseRevenue" value="285714" readonly style="background: #f8f9fa;">
+                </div>
+                
+                <div class="input-group">
+                    <label>Minimum Guarantee ($)</label>
+                    <input type="number" id="minGuarantee" value="60000">
+                </div>
+                
+                <div class="input-group">
+                    <label>Target Annual Revenue ($)</label>
+                    <input type="number" id="targetRevenue" value="150000">
+                </div>
+                
+                <div class="input-group">
+                    <label>Maximum Total Share (%)</label>
+                    <input type="number" id="maxShare" min="30" max="50" value="50">
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3>Revenue Calculation</h3>
+                
+                <div class="result-box">
+                    <div class="result-item">
+                        <span>Inventory Exposure:</span>
+                        <span id="resultInventory">50%</span>
+                    </div>
+                    <div class="result-item highlight">
+                        <span>Your Share %:</span>
+                        <span id="resultSharePercent">35%</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Base Revenue:</span>
+                        <span id="resultBaseRevenue">$285,714</span>
+                    </div>
+                    <div class="result-item">
+                        <span>Your Total Revenue:</span>
+                        <span id="resultYourRevenue">$150,000</span>
+                    </div>
+                    <div class="result-item total">
+                        <span>Client Revenue:</span>
+                        <span id="resultClientRevenue">$135,714</span>
+                    </div>
+                </div>
+                
+                <div class="breakdown-box">
+                    <h4 style="margin-bottom: 10px;">Revenue Breakdown</h4>
+                    <div class="breakdown-item">
+                        <span>Base Guarantee:</span>
+                        <span id="baseAmount">$60,000</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Performance Share:</span>
+                        <span id="performanceAmount">$90,000</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Performance %:</span>
+                        <span id="performancePercent">31.5%</span>
+                    </div>
+                </div>
+                
+                <div id="alertBox" class="alert"></div>
+                
+                <div class="formula-box">
+                    <h4>Dynamic Formula</h4>
+                    <p style="color: #666; line-height: 1.6;">
+                        Total Share = MAX(30%, Base% + Performance%)<br>
+                        Performance% decreases from 40% to 15% as inventory increases<br>
+                        Ensures minimum $150K target while allowing growth<br>
+                        Both parties guaranteed minimum $60K+
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Revenue Share Schedule</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Inventory %</th>
+                        <th>Base Revenue</th>
+                        <th>Your Share %</th>
+                        <th>Your Revenue</th>
+                        <th>Client Revenue</th>
+                        <th>Client Benefit</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    <script>
+        // Revenue data mapping
+        const revenueMap = {
+            5: 28571, 10: 57143, 15: 85714, 20: 114286,
+            25: 142857, 30: 171429, 35: 200000, 40: 228571,
+            45: 257143, 50: 285714, 55: 314286, 60: 342857,
+            65: 371429, 70: 400000, 75: 428571, 80: 457143,
+            85: 485714, 90: 514286, 95: 542857, 100: 571429
+        };
+        
+        // Main calculation function
+        function calculateShare(inventory, minGuarantee, targetRevenue, maxShare) {
+            const baseRevenue = revenueMap[inventory] || 285714;
+            const baseGuaranteePercent = (minGuarantee / baseRevenue) * 100;
+            
+            // Progressive performance share - starts high, decreases with inventory
+            let performancePercent;
+            if (inventory <= 30) {
+                performancePercent = 40;
+            } else if (inventory <= 50) {
+                // 40% to 30% over 30-50 range
+                performancePercent = 40 - ((inventory - 30) / 20) * 10;
+            } else if (inventory <= 70) {
+                // 30% to 22% over 50-70 range  
+                performancePercent = 30 - ((inventory - 50) / 20) * 8;
+            } else if (inventory <= 90) {
+                // 22% to 17% over 70-90 range
+                performancePercent = 22 - ((inventory - 70) / 20) * 5;
+            } else {
+                // 17% to 15% over 90-100 range
+                performancePercent = 17 - ((inventory - 90) / 10) * 2;
+            }
+            
+            // Calculate total share
+            let totalSharePercent = baseGuaranteePercent + performancePercent;
+            
+            // Apply 30% minimum rule for revenue optimization
+            if (totalSharePercent < 30) {
+                totalSharePercent = 30;
+            }
+            
+            // Ensure minimum revenue target
+            const minNeededPercent = (targetRevenue / baseRevenue) * 100;
+            if (totalSharePercent < minNeededPercent) {
+                totalSharePercent = minNeededPercent;
+            }
+            
+            // Cap at maximum share
+            if (totalSharePercent > maxShare) {
+                totalSharePercent = maxShare;
+            }
+            
+            // Calculate final amounts
+            const totalRevenue = Math.round(baseRevenue * (totalSharePercent / 100));
+            const actualPerformanceShare = Math.max(0, totalRevenue - minGuarantee);
+            const actualPerformancePercent = (actualPerformanceShare / baseRevenue) * 100;
+            const clientRevenue = baseRevenue - totalRevenue;
+            
+            return {
+                baseRevenue: baseRevenue,
+                totalSharePercent: totalSharePercent,
+                totalRevenue: totalRevenue,
+                performanceShare: actualPerformanceShare,
+                performancePercent: actualPerformancePercent,
+                clientRevenue: clientRevenue
+            };
+        }
+        
+        // Update display
+        function updateDisplay() {
+            const inventory = parseInt(document.getElementById('inventory').value);
+            const minGuarantee = parseInt(document.getElementById('minGuarantee').value);
+            const targetRevenue = parseInt(document.getElementById('targetRevenue').value);
+            const maxShare = parseInt(document.getElementById('maxShare').value);
+            
+            const result = calculateShare(inventory, minGuarantee, targetRevenue, maxShare);
+            
+            // Update base revenue
+            document.getElementById('baseRevenue').value = result.baseRevenue;
+            
+            // Update results
+            document.getElementById('resultInventory').textContent = inventory + '%';
+            document.getElementById('resultSharePercent').textContent = result.totalSharePercent.toFixed(1) + '%';
+            document.getElementById('resultBaseRevenue').textContent = '$' + result.baseRevenue.toLocaleString();
+            document.getElementById('resultYourRevenue').textContent = '$' + result.totalRevenue.toLocaleString();
+            document.getElementById('resultClientRevenue').textContent = '$' + result.clientRevenue.toLocaleString();
+            
+            // Update breakdown
+            document.getElementById('baseAmount').textContent = '$' + minGuarantee.toLocaleString();
+            document.getElementById('performanceAmount').textContent = '$' + result.performanceShare.toLocaleString();
+            document.getElementById('performancePercent').textContent = result.performancePercent.toFixed(1) + '%';
+            
+            // Update alert
+            const alertBox = document.getElementById('alertBox');
+            if (result.totalRevenue > targetRevenue * 1.1) {
+                alertBox.className = 'alert success show';
+                alertBox.textContent = '✓ Excellent! Revenue of $' + result.totalRevenue.toLocaleString() + 
+                    ' exceeds target by $' + (result.totalRevenue - targetRevenue).toLocaleString();
+            } else if (result.totalRevenue >= targetRevenue) {
+                alertBox.className = 'alert success show';
+                alertBox.textContent = '✓ Target achieved! Revenue: $' + result.totalRevenue.toLocaleString();
+            } else if (result.totalSharePercent >= maxShare) {
+                alertBox.className = 'alert warning show';
+                alertBox.textContent = '⚠️ At maximum ' + maxShare + '% share cap';
+            } else {
+                alertBox.className = 'alert warning show';
+                alertBox.textContent = '⚠️ Below target by $' + (targetRevenue - result.totalRevenue).toLocaleString();
+            }
+            
+            updateTable();
+        }
+        
+        // Update table
+        function updateTable() {
+            const tbody = document.getElementById('tableBody');
+            const currentInventory = parseInt(document.getElementById('inventory').value);
+            const minGuarantee = parseInt(document.getElementById('minGuarantee').value);
+            const targetRevenue = parseInt(document.getElementById('targetRevenue').value);
+            const maxShare = parseInt(document.getElementById('maxShare').value);
+            
+            tbody.innerHTML = '';
+            
+            // Show disabled rows below 25%
+            for (let inv = 5; inv < 25; inv += 5) {
+                const baseRevenue = revenueMap[inv] || 0;
+                const row = tbody.insertRow();
+                row.className = 'disabled-row';
+                row.innerHTML = 
+                    '<td>' + inv + '%</td>' +
+                    '<td>$' + baseRevenue.toLocaleString() + '</td>' +
+                    '<td colspan="4" style="text-align: center;">Below minimum - Client would receive less than $60K</td>';
+            }
+            
+            // Show active rows from 25% onwards
+            for (let inv = 25; inv <= 100; inv += 5) {
+                const result = calculateShare(inv, minGuarantee, targetRevenue, maxShare);
+                const maxPossible = Math.round(result.baseRevenue * (maxShare / 100));
+                const clientBenefit = maxPossible - result.totalRevenue;
+                
+                const row = tbody.insertRow();
+                if (inv === currentInventory) {
+                    row.className = 'highlight-row';
+                }
+                
+                row.innerHTML = 
+                    '<td>' + inv + '%</td>' +
+                    '<td>$' + result.baseRevenue.toLocaleString() + '</td>' +
+                    '<td>' + result.totalSharePercent.toFixed(1) + '%</td>' +
+                    '<td>$' + result.totalRevenue.toLocaleString() + '</td>' +
+                    '<td>$' + result.clientRevenue.toLocaleString() + '</td>' +
+                    '<td>$' + clientBenefit.toLocaleString() + '</td>';
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('inventory').addEventListener('input', function() {
+            const value = parseInt(this.value);
+            if (value < 25) this.value = 25;
+            if (value > 100) this.value = 100;
+            document.getElementById('inventorySlider').value = this.value;
+            updateDisplay();
+        });
+        
+        document.getElementById('inventorySlider').addEventListener('input', function() {
+            document.getElementById('inventory').value = this.value;
+            updateDisplay();
+        });
+        
+        document.getElementById('minGuarantee').addEventListener('input', updateDisplay);
+        document.getElementById('targetRevenue').addEventListener('input', updateDisplay);
+        document.getElementById('maxShare').addEventListener('input', updateDisplay);
+        
+        // Initial calculation
+        updateDisplay();
+    </script>
+</body>
+</html>
