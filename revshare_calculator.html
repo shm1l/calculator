@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Progressive Revenue Share Model Calculator</title>
+    <title>Visual Revenue Share Calculator</title>
     <style>
         * {
             margin: 0;
@@ -12,7 +12,7 @@
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -39,8 +39,7 @@
         
         .subtitle {
             color: #666;
-            margin-bottom: 30px;
-            font-size: 1.1em;
+            margin-bottom: 20px;
         }
         
         .notice {
@@ -70,9 +69,8 @@
         .card h3 {
             color: #333;
             margin-bottom: 20px;
-            font-size: 1.3em;
-            border-bottom: 2px solid #667eea;
             padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
         }
         
         .input-group {
@@ -86,73 +84,154 @@
             font-weight: 500;
         }
         
-        input[type="number"] {
+        input {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
-            font-size: 1em;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #667eea;
         }
         
         input[type="range"] {
-            width: 100%;
             margin-top: 10px;
-            cursor: pointer;
         }
         
         .result-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            background: white;
             padding: 20px;
             border-radius: 10px;
             margin-top: 20px;
+            border: 2px solid #e0e0e0;
         }
         
         .result-item {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 12px;
-            padding: 8px 0;
-        }
-        
-        .result-item.highlight {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
-            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 1.1em;
         }
         
         .result-item.total {
-            border-top: 2px solid rgba(255, 255, 255, 0.3);
-            padding-top: 15px;
             font-weight: bold;
-            font-size: 1.2em;
+            color: #333;
+            font-size: 1.3em;
+            padding-top: 15px;
+            border-top: 2px solid #e0e0e0;
         }
         
-        .breakdown-box {
-            background: #f0f4ff;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-        
-        .breakdown-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            color: #444;
-        }
-        
-        .formula-box {
+        .visual-split {
+            margin-top: 25px;
+            padding: 20px;
             background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .split-bar {
+            width: 100%;
+            height: 60px;
+            display: flex;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 15px;
+        }
+        
+        .your-portion {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .client-portion {
+            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .split-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .split-detail {
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .split-label {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .split-value {
+            font-size: 1.3em;
+            font-weight: bold;
+        }
+        
+        .your-detail .split-value {
+            color: #667eea;
+        }
+        
+        .client-detail .split-value {
+            color: #4caf50;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin-bottom: 30px;
+            background: white;
             padding: 20px;
             border-radius: 10px;
-            margin-top: 20px;
-            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         
-        .formula-box h4 {
-            color: #333;
-            margin-bottom: 10px;
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .chart-legend {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            font-size: 0.9em;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 20px;
+            height: 3px;
+            margin-right: 8px;
         }
         
         table {
@@ -166,6 +245,7 @@
             color: white;
             padding: 12px;
             text-align: left;
+            font-weight: 600;
         }
         
         td {
@@ -179,45 +259,40 @@
         
         .highlight-row {
             background: #e8f4f8 !important;
+            font-weight: bold;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85em;
             font-weight: 600;
         }
         
-        .disabled-row {
-            background: #f8f8f8;
-            color: #999;
+        .status-breakeven {
+            background: #ffc107;
+            color: #000;
         }
         
-        .alert {
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: none;
+        .status-optimal {
+            background: #4caf50;
+            color: white;
         }
         
-        .alert.show {
-            display: block;
-        }
-        
-        .alert.success {
-            background: #d4edda;
-            border: 1px solid #28a745;
-            color: #155724;
-        }
-        
-        .alert.warning {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            color: #856404;
+        .status-current {
+            background: #667eea;
+            color: white;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Progressive Revenue Share Model</h1>
-        <p class="subtitle">Fair-share model ensuring both parties receive minimum $60K</p>
+        <h1>Visual Revenue Share Calculator</h1>
+        <p class="subtitle">Progressive model with visual split analysis</p>
         
-        <div class="notice">
-            <strong>ℹ️ Fair Share Principle:</strong> Minimum inventory exposure is 25% to ensure the client receives at least $60K (matching your base guarantee). This creates a balanced partnership where both parties benefit fairly.
+        <div class="notice" id="noticeBox">
+            Loading...
         </div>
         
         <div class="grid">
@@ -225,110 +300,120 @@
                 <h3>Input Parameters</h3>
                 
                 <div class="input-group">
-                    <label>Inventory Exposure (%) - Min: 25%</label>
-                    <input type="number" id="inventory" min="25" max="100" step="5" value="50">
-                    <input type="range" id="inventorySlider" min="25" max="100" step="5" value="50">
+                    <label>Annual Passengers (PAX)</label>
+                    <input type="number" id="pax" value="200000" step="10000">
                 </div>
                 
                 <div class="input-group">
-                    <label>Base Revenue (Before Share)</label>
-                    <input type="number" id="baseRevenue" value="285714" readonly style="background: #f8f9fa;">
-                </div>
-                
-                <div class="input-group">
-                    <label>Minimum Guarantee ($)</label>
-                    <input type="number" id="minGuarantee" value="60000">
+                    <label>Minimum License Fee ($)</label>
+                    <input type="number" id="license" value="60000" step="5000">
                 </div>
                 
                 <div class="input-group">
                     <label>Target Annual Revenue ($)</label>
-                    <input type="number" id="targetRevenue" value="150000">
+                    <input type="number" id="target" value="150000" step="10000">
                 </div>
                 
                 <div class="input-group">
-                    <label>Maximum Total Share (%)</label>
-                    <input type="number" id="maxShare" min="30" max="50" value="50">
+                    <label id="invLabel">Inventory Exposure (%)</label>
+                    <input type="number" id="inv" value="70" step="5">
+                    <input type="range" id="invSlider" min="5" max="100" step="5" value="70">
+                </div>
+                
+                <div class="input-group">
+                    <label>Total Revenue Generated</label>
+                    <input type="number" id="totalRev" value="0" readonly style="background: #f0f0f0;">
                 </div>
             </div>
             
             <div class="card">
-                <h3>Revenue Calculation</h3>
+                <h3>Revenue Analysis</h3>
                 
                 <div class="result-box">
                     <div class="result-item">
-                        <span>Inventory Exposure:</span>
-                        <span id="resultInventory">50%</span>
-                    </div>
-                    <div class="result-item highlight">
-                        <span>Your Share %:</span>
-                        <span id="resultSharePercent">35%</span>
+                        <span>Total Revenue:</span>
+                        <span id="dispTotal">$0</span>
                     </div>
                     <div class="result-item">
-                        <span>Base Revenue:</span>
-                        <span id="resultBaseRevenue">$285,714</span>
+                        <span>Your Revenue:</span>
+                        <span id="dispYours">$0</span>
                     </div>
                     <div class="result-item">
-                        <span>Your Total Revenue:</span>
-                        <span id="resultYourRevenue">$150,000</span>
+                        <span>Client Revenue:</span>
+                        <span id="dispClient">$0</span>
                     </div>
                     <div class="result-item total">
-                        <span>Client Revenue:</span>
-                        <span id="resultClientRevenue">$135,714</span>
+                        <span>Revenue Split:</span>
+                        <span id="dispSplit">0% / 0%</span>
                     </div>
                 </div>
                 
-                <div class="breakdown-box">
-                    <h4 style="margin-bottom: 10px;">Revenue Breakdown</h4>
-                    <div class="breakdown-item">
-                        <span>Base Guarantee:</span>
-                        <span id="baseAmount">$60,000</span>
+                <div class="visual-split">
+                    <h4 style="margin-bottom: 15px; color: #333;">Visual Revenue Split</h4>
+                    <div class="split-bar">
+                        <div class="your-portion" id="yourBar">
+                            Your Share
+                        </div>
+                        <div class="client-portion" id="clientBar">
+                            Client Share
+                        </div>
                     </div>
-                    <div class="breakdown-item">
-                        <span>Performance Share:</span>
-                        <span id="performanceAmount">$90,000</span>
+                    <div class="split-details">
+                        <div class="split-detail your-detail">
+                            <div class="split-label">Your Portion</div>
+                            <div class="split-value" id="yourValue">$0</div>
+                        </div>
+                        <div class="split-detail client-detail">
+                            <div class="split-label">Client Portion</div>
+                            <div class="split-value" id="clientValue">$0</div>
+                        </div>
                     </div>
-                    <div class="breakdown-item">
-                        <span>Performance %:</span>
-                        <span id="performancePercent">31.5%</span>
-                    </div>
-                </div>
-                
-                <div id="alertBox" class="alert"></div>
-                
-                <div class="formula-box">
-                    <h4>Dynamic Formula</h4>
-                    <p style="color: #666; line-height: 1.6;">
-                        Total Share = MAX(30%, Base% + Performance%)<br>
-                        Performance% decreases from 40% to 15% as inventory increases<br>
-                        Ensures minimum $150K target while allowing growth<br>
-                        Both parties guaranteed minimum $60K+
-                    </p>
                 </div>
             </div>
         </div>
         
         <div class="card">
-            <h3>Revenue Share Schedule</h3>
+            <h3>Revenue Share Analysis Chart</h3>
+            <div class="chart-container">
+                <canvas id="revenueChart"></canvas>
+                <div class="chart-legend">
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #ffc107;"></div>
+                        <span>Break-even Point</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #4caf50;"></div>
+                        <span>Optimal Point</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background: #667eea;"></div>
+                        <span>Current Selection</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Revenue Schedule by Inventory Level</h3>
             <table>
                 <thead>
                     <tr>
                         <th>Inventory %</th>
-                        <th>Base Revenue</th>
-                        <th>Your Share %</th>
+                        <th>Total Revenue</th>
                         <th>Your Revenue</th>
                         <th>Client Revenue</th>
-                        <th>Client Benefit</th>
+                        <th>Split Ratio</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                </tbody>
+                <tbody id="tableBody"></tbody>
             </table>
         </div>
     </div>
     
     <script>
-        // Revenue data mapping
-        const revenueMap = {
+        // Revenue base data
+        const baseRev = {
             5: 28571, 10: 57143, 15: 85714, 20: 114286,
             25: 142857, 30: 171429, 35: 200000, 40: 228571,
             45: 257143, 50: 285714, 55: 314286, 60: 342857,
@@ -336,170 +421,346 @@
             85: 485714, 90: 514286, 95: 542857, 100: 571429
         };
         
-        // Main calculation function
-        function calculateShare(inventory, minGuarantee, targetRevenue, maxShare) {
-            const baseRevenue = revenueMap[inventory] || 285714;
-            const baseGuaranteePercent = (minGuarantee / baseRevenue) * 100;
-            
-            // Progressive performance share - starts high, decreases with inventory
-            let performancePercent;
-            if (inventory <= 30) {
-                performancePercent = 40;
-            } else if (inventory <= 50) {
-                // 40% to 30% over 30-50 range
-                performancePercent = 40 - ((inventory - 30) / 20) * 10;
-            } else if (inventory <= 70) {
-                // 30% to 22% over 50-70 range  
-                performancePercent = 30 - ((inventory - 50) / 20) * 8;
-            } else if (inventory <= 90) {
-                // 22% to 17% over 70-90 range
-                performancePercent = 22 - ((inventory - 70) / 20) * 5;
-            } else {
-                // 17% to 15% over 90-100 range
-                performancePercent = 17 - ((inventory - 90) / 10) * 2;
+        let chartInstance = null;
+        
+        function getRev(pax, inv) {
+            const scale = pax / 200000;
+            return Math.round((baseRev[inv] || 400000) * scale);
+        }
+        
+        function calc(total, lic, tgt) {
+            if (total < lic) {
+                return { yours: 0, client: 0, brackets: [] };
             }
             
-            // Calculate total share
-            let totalSharePercent = baseGuaranteePercent + performancePercent;
-            
-            // Apply 30% minimum rule for revenue optimization
-            if (totalSharePercent < 30) {
-                totalSharePercent = 30;
+            if (total === lic) {
+                return { yours: lic, client: 0, brackets: [] };
             }
             
-            // Ensure minimum revenue target
-            const minNeededPercent = (targetRevenue / baseRevenue) * 100;
-            if (totalSharePercent < minNeededPercent) {
-                totalSharePercent = minNeededPercent;
+            if (total <= lic * 2) {
+                return { yours: lic, client: total - lic, brackets: [] };
             }
             
-            // Cap at maximum share
-            if (totalSharePercent > maxShare) {
-                totalSharePercent = maxShare;
+            if (total < tgt * 2) {
+                const half = Math.round(total / 2);
+                return { yours: half, client: half, brackets: [] };
             }
             
-            // Calculate final amounts
-            const totalRevenue = Math.round(baseRevenue * (totalSharePercent / 100));
-            const actualPerformanceShare = Math.max(0, totalRevenue - minGuarantee);
-            const actualPerformancePercent = (actualPerformanceShare / baseRevenue) * 100;
-            const clientRevenue = baseRevenue - totalRevenue;
+            let yours = tgt;
+            let brackets = [];
+            let remain = total - tgt;
+            let ratio = 3;
+            const bSize = tgt * 0.1;
+            let bStart = tgt;
+            
+            for (let i = 0; i < 10 && remain > 0; i++) {
+                const chunk = Math.min(remain, bSize);
+                const yChunk = chunk / (ratio + 1);
+                const cChunk = chunk * ratio / (ratio + 1);
+                
+                yours += yChunk;
+                brackets.push({
+                    start: bStart,
+                    end: bStart + chunk,
+                    ratio: ratio,
+                    yours: Math.round(yChunk),
+                    client: Math.round(cChunk)
+                });
+                
+                bStart += chunk;
+                remain -= chunk;
+                ratio *= 2;
+            }
             
             return {
-                baseRevenue: baseRevenue,
-                totalSharePercent: totalSharePercent,
-                totalRevenue: totalRevenue,
-                performanceShare: actualPerformanceShare,
-                performancePercent: actualPerformancePercent,
-                clientRevenue: clientRevenue
+                yours: Math.round(yours),
+                client: Math.round(total - yours),
+                brackets: brackets
             };
         }
         
-        // Update display
-        function updateDisplay() {
-            const inventory = parseInt(document.getElementById('inventory').value);
-            const minGuarantee = parseInt(document.getElementById('minGuarantee').value);
-            const targetRevenue = parseInt(document.getElementById('targetRevenue').value);
-            const maxShare = parseInt(document.getElementById('maxShare').value);
+        function drawChart(pax, lic, tgt, currentInv, minInv, optimalInv) {
+            const canvas = document.getElementById('revenueChart');
+            const ctx = canvas.getContext('2d');
             
-            const result = calculateShare(inventory, minGuarantee, targetRevenue, maxShare);
+            // Set canvas size
+            canvas.width = canvas.offsetWidth;
+            canvas.height = canvas.offsetHeight;
             
-            // Update base revenue
-            document.getElementById('baseRevenue').value = result.baseRevenue;
+            const width = canvas.width;
+            const height = canvas.height;
+            const padding = 40;
+            const chartWidth = width - padding * 2;
+            const chartHeight = height - padding * 2;
             
-            // Update results
-            document.getElementById('resultInventory').textContent = inventory + '%';
-            document.getElementById('resultSharePercent').textContent = result.totalSharePercent.toFixed(1) + '%';
-            document.getElementById('resultBaseRevenue').textContent = '$' + result.baseRevenue.toLocaleString();
-            document.getElementById('resultYourRevenue').textContent = '$' + result.totalRevenue.toLocaleString();
-            document.getElementById('resultClientRevenue').textContent = '$' + result.clientRevenue.toLocaleString();
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
             
-            // Update breakdown
-            document.getElementById('baseAmount').textContent = '$' + minGuarantee.toLocaleString();
-            document.getElementById('performanceAmount').textContent = '$' + result.performanceShare.toLocaleString();
-            document.getElementById('performancePercent').textContent = result.performancePercent.toFixed(1) + '%';
-            
-            // Update alert
-            const alertBox = document.getElementById('alertBox');
-            if (result.totalRevenue > targetRevenue * 1.1) {
-                alertBox.className = 'alert success show';
-                alertBox.textContent = '✓ Excellent! Revenue of $' + result.totalRevenue.toLocaleString() + 
-                    ' exceeds target by $' + (result.totalRevenue - targetRevenue).toLocaleString();
-            } else if (result.totalRevenue >= targetRevenue) {
-                alertBox.className = 'alert success show';
-                alertBox.textContent = '✓ Target achieved! Revenue: $' + result.totalRevenue.toLocaleString();
-            } else if (result.totalSharePercent >= maxShare) {
-                alertBox.className = 'alert warning show';
-                alertBox.textContent = '⚠️ At maximum ' + maxShare + '% share cap';
-            } else {
-                alertBox.className = 'alert warning show';
-                alertBox.textContent = '⚠️ Below target by $' + (targetRevenue - result.totalRevenue).toLocaleString();
+            // Find max revenue for scale
+            let maxRev = 0;
+            for (let i = minInv; i <= 100; i += 5) {
+                const rev = getRev(pax, i);
+                if (rev > maxRev) maxRev = rev;
             }
             
-            updateTable();
+            // Draw axes
+            ctx.strokeStyle = '#ddd';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding, padding);
+            ctx.lineTo(padding, height - padding);
+            ctx.lineTo(width - padding, height - padding);
+            ctx.stroke();
+            
+            // Draw grid lines
+            ctx.strokeStyle = '#f0f0f0';
+            for (let i = 0; i <= 5; i++) {
+                const y = padding + (chartHeight / 5) * i;
+                ctx.beginPath();
+                ctx.moveTo(padding, y);
+                ctx.lineTo(width - padding, y);
+                ctx.stroke();
+            }
+            
+            // Draw your revenue line
+            ctx.strokeStyle = '#667eea';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            let firstPoint = true;
+            
+            for (let i = minInv; i <= 100; i += 5) {
+                const rev = getRev(pax, i);
+                const result = calc(rev, lic, tgt);
+                const x = padding + ((i - minInv) / (100 - minInv)) * chartWidth;
+                const y = height - padding - (result.yours / maxRev) * chartHeight;
+                
+                if (firstPoint) {
+                    ctx.moveTo(x, y);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Draw client revenue line
+            ctx.strokeStyle = '#4caf50';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            firstPoint = true;
+            
+            for (let i = minInv; i <= 100; i += 5) {
+                const rev = getRev(pax, i);
+                const result = calc(rev, lic, tgt);
+                const x = padding + ((i - minInv) / (100 - minInv)) * chartWidth;
+                const y = height - padding - (result.client / maxRev) * chartHeight;
+                
+                if (firstPoint) {
+                    ctx.moveTo(x, y);
+                    firstPoint = false;
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.stroke();
+            
+            // Mark break-even point
+            const breakX = padding;
+            ctx.strokeStyle = '#ffc107';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(breakX, padding);
+            ctx.lineTo(breakX, height - padding);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            
+            // Mark optimal point
+            if (optimalInv >= minInv) {
+                const optX = padding + ((optimalInv - minInv) / (100 - minInv)) * chartWidth;
+                ctx.strokeStyle = '#4caf50';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(optX, padding);
+                ctx.lineTo(optX, height - padding);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            // Mark current point
+            if (currentInv >= minInv) {
+                const currX = padding + ((currentInv - minInv) / (100 - minInv)) * chartWidth;
+                ctx.strokeStyle = '#667eea';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(currX, padding);
+                ctx.lineTo(currX, height - padding);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                
+                // Draw current point circle
+                const rev = getRev(pax, currentInv);
+                const result = calc(rev, lic, tgt);
+                const y = height - padding - (result.yours / maxRev) * chartHeight;
+                
+                ctx.fillStyle = '#667eea';
+                ctx.beginPath();
+                ctx.arc(currX, y, 5, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+            
+            // Draw labels
+            ctx.fillStyle = '#666';
+            ctx.font = '12px sans-serif';
+            ctx.textAlign = 'center';
+            
+            // X-axis labels
+            for (let i = minInv; i <= 100; i += 20) {
+                if (i <= 100) {
+                    const x = padding + ((i - minInv) / (100 - minInv)) * chartWidth;
+                    ctx.fillText(i + '%', x, height - padding + 20);
+                }
+            }
+            
+            // Y-axis labels
+            ctx.textAlign = 'right';
+            for (let i = 0; i <= 5; i++) {
+                const value = Math.round((maxRev / 5) * (5 - i) / 1000);
+                const y = padding + (chartHeight / 5) * i;
+                ctx.fillText('$' + value + 'K', padding - 10, y + 5);
+            }
         }
         
-        // Update table
-        function updateTable() {
-            const tbody = document.getElementById('tableBody');
-            const currentInventory = parseInt(document.getElementById('inventory').value);
-            const minGuarantee = parseInt(document.getElementById('minGuarantee').value);
-            const targetRevenue = parseInt(document.getElementById('targetRevenue').value);
-            const maxShare = parseInt(document.getElementById('maxShare').value);
+        function update() {
+            const pax = parseInt(document.getElementById('pax').value) || 200000;
+            const lic = parseInt(document.getElementById('license').value) || 60000;
+            const tgt = parseInt(document.getElementById('target').value) || 150000;
+            let inv = parseInt(document.getElementById('inv').value) || 70;
             
+            // Find minimum inventory
+            let minInv = 100;
+            for (let i = 5; i <= 100; i += 5) {
+                if (getRev(pax, i) >= lic) {
+                    minInv = i;
+                    break;
+                }
+            }
+            
+            // Find optimal inventory (where target is reached with good client ratio)
+            let optimalInv = 100;
+            for (let i = minInv; i <= 100; i += 5) {
+                const rev = getRev(pax, i);
+                if (rev >= tgt * 2) {
+                    optimalInv = i;
+                    break;
+                }
+            }
+            
+            // Set slider constraints
+            document.getElementById('inv').min = minInv;
+            document.getElementById('invSlider').min = minInv;
+            
+            if (inv < minInv) {
+                inv = minInv;
+                document.getElementById('inv').value = inv;
+                document.getElementById('invSlider').value = inv;
+            }
+            
+            // Update notice
+            const noticeHTML = [
+                '<strong>Key Points:</strong>',
+                '🔸 Break-even at ' + minInv + '% inventory ($' + lic.toLocaleString() + ' revenue)',
+                '🔸 Optimal point at ' + optimalInv + '% inventory (target achieved with progressive ratios)',
+                '🔸 Target requires $' + (tgt * 2).toLocaleString() + ' total revenue for fair split'
+            ].join('<br>');
+            document.getElementById('noticeBox').innerHTML = noticeHTML;
+            
+            document.getElementById('invLabel').textContent = 'Inventory Exposure (%) - Min: ' + minInv + '%';
+            
+            // Calculate
+            const total = getRev(pax, inv);
+            const result = calc(total, lic, tgt);
+            
+            // Update displays
+            document.getElementById('totalRev').value = total;
+            document.getElementById('dispTotal').textContent = '$' + total.toLocaleString();
+            document.getElementById('dispYours').textContent = '$' + result.yours.toLocaleString();
+            document.getElementById('dispClient').textContent = '$' + result.client.toLocaleString();
+            
+            const yPct = total > 0 ? Math.round(result.yours / total * 100) : 0;
+            const cPct = total > 0 ? Math.round(result.client / total * 100) : 0;
+            document.getElementById('dispSplit').textContent = yPct + '% / ' + cPct + '%';
+            
+            // Update visual split bar
+            const yourBar = document.getElementById('yourBar');
+            const clientBar = document.getElementById('clientBar');
+            yourBar.style.width = yPct + '%';
+            yourBar.innerHTML = 'Your ' + yPct + '%';
+            clientBar.innerHTML = 'Client ' + cPct + '%';
+            
+            // Update split values
+            document.getElementById('yourValue').textContent = '$' + result.yours.toLocaleString();
+            document.getElementById('clientValue').textContent = '$' + result.client.toLocaleString();
+            
+            // Draw chart
+            drawChart(pax, lic, tgt, inv, minInv, optimalInv);
+            
+            // Update table
+            const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            // Show disabled rows below 25%
-            for (let inv = 5; inv < 25; inv += 5) {
-                const baseRevenue = revenueMap[inv] || 0;
+            for (let i = minInv; i <= 100; i += 5) {
+                const rev = getRev(pax, i);
+                const res = calc(rev, lic, tgt);
                 const row = tbody.insertRow();
-                row.className = 'disabled-row';
-                row.innerHTML = 
-                    '<td>' + inv + '%</td>' +
-                    '<td>$' + baseRevenue.toLocaleString() + '</td>' +
-                    '<td colspan="4" style="text-align: center;">Below minimum - Client would receive less than $60K</td>';
-            }
-            
-            // Show active rows from 25% onwards
-            for (let inv = 25; inv <= 100; inv += 5) {
-                const result = calculateShare(inv, minGuarantee, targetRevenue, maxShare);
-                const maxPossible = Math.round(result.baseRevenue * (maxShare / 100));
-                const clientBenefit = maxPossible - result.totalRevenue;
                 
-                const row = tbody.insertRow();
-                if (inv === currentInventory) {
-                    row.className = 'highlight-row';
+                if (i === inv) row.className = 'highlight-row';
+                
+                const cell1 = row.insertCell();
+                const cell2 = row.insertCell();
+                const cell3 = row.insertCell();
+                const cell4 = row.insertCell();
+                const cell5 = row.insertCell();
+                const cell6 = row.insertCell();
+                
+                cell1.textContent = i + '%';
+                cell2.textContent = '$' + rev.toLocaleString();
+                cell3.textContent = '$' + res.yours.toLocaleString();
+                cell4.textContent = '$' + res.client.toLocaleString();
+                
+                const y = rev > 0 ? Math.round(res.yours / rev * 100) : 0;
+                const c = rev > 0 ? Math.round(res.client / rev * 100) : 0;
+                cell5.textContent = y + '/' + c;
+                
+                // Status badges
+                let statusHTML = '';
+                if (i === minInv) {
+                    statusHTML = '<span class="status-badge status-breakeven">Break-even</span>';
+                } else if (i === optimalInv) {
+                    statusHTML = '<span class="status-badge status-optimal">Optimal</span>';
+                } else if (i === inv) {
+                    statusHTML = '<span class="status-badge status-current">Current</span>';
                 }
-                
-                row.innerHTML = 
-                    '<td>' + inv + '%</td>' +
-                    '<td>$' + result.baseRevenue.toLocaleString() + '</td>' +
-                    '<td>' + result.totalSharePercent.toFixed(1) + '%</td>' +
-                    '<td>$' + result.totalRevenue.toLocaleString() + '</td>' +
-                    '<td>$' + result.clientRevenue.toLocaleString() + '</td>' +
-                    '<td>$' + clientBenefit.toLocaleString() + '</td>';
+                cell6.innerHTML = statusHTML;
             }
         }
         
-        // Event listeners
-        document.getElementById('inventory').addEventListener('input', function() {
-            const value = parseInt(this.value);
-            if (value < 25) this.value = 25;
-            if (value > 100) this.value = 100;
-            document.getElementById('inventorySlider').value = this.value;
-            updateDisplay();
+        // Events
+        document.getElementById('pax').addEventListener('input', update);
+        document.getElementById('license').addEventListener('input', update);
+        document.getElementById('target').addEventListener('input', update);
+        document.getElementById('inv').addEventListener('input', function() {
+            document.getElementById('invSlider').value = this.value;
+            update();
+        });
+        document.getElementById('invSlider').addEventListener('input', function() {
+            document.getElementById('inv').value = this.value;
+            update();
         });
         
-        document.getElementById('inventorySlider').addEventListener('input', function() {
-            document.getElementById('inventory').value = this.value;
-            updateDisplay();
-        });
-        
-        document.getElementById('minGuarantee').addEventListener('input', updateDisplay);
-        document.getElementById('targetRevenue').addEventListener('input', updateDisplay);
-        document.getElementById('maxShare').addEventListener('input', updateDisplay);
-        
-        // Initial calculation
-        updateDisplay();
+        update();
     </script>
 </body>
 </html>
