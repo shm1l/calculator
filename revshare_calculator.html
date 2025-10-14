@@ -1,765 +1,339 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Visual Revenue Share Calculator</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-        
-        h1 {
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 2.5em;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 20px;
-        }
-        
-        .notice {
-            background: #e3f2fd;
-            border: 1px solid #2196f3;
-            color: #0d47a1;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-            margin-bottom: 30px;
-        }
-        
-        .card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e0e0e0;
-        }
-        
-        .card h3 {
-            color: #333;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #667eea;
-        }
-        
-        .input-group {
-            margin-bottom: 20px;
-        }
-        
-        .input-group label {
-            display: block;
-            color: #555;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-        
-        input {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        input[type="range"] {
-            margin-top: 10px;
-        }
-        
-        .result-box {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-top: 20px;
-            border: 2px solid #e0e0e0;
-        }
-        
-        .result-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 15px;
-            font-size: 1.1em;
-        }
-        
-        .result-item.total {
-            font-weight: bold;
-            color: #333;
-            font-size: 1.3em;
-            padding-top: 15px;
-            border-top: 2px solid #e0e0e0;
-        }
-        
-        .visual-split {
-            margin-top: 25px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 10px;
-        }
-        
-        .split-bar {
-            width: 100%;
-            height: 60px;
-            display: flex;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            margin-bottom: 15px;
-        }
-        
-        .your-portion {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-            transition: all 0.3s;
-        }
-        
-        .client-portion {
-            background: linear-gradient(135deg, #4caf50 0%, #2e7d32 100%);
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: bold;
-            font-size: 14px;
-        }
-        
-        .split-details {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .split-detail {
-            padding: 10px;
-            background: white;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .split-label {
-            font-size: 0.9em;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        
-        .split-value {
-            font-size: 1.3em;
-            font-weight: bold;
-        }
-        
-        .your-detail .split-value {
-            color: #667eea;
-        }
-        
-        .client-detail .split-value {
-            color: #4caf50;
-        }
-        
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin-bottom: 30px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
-        .chart-legend {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            font-size: 0.9em;
-        }
-        
-        .legend-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-        
-        .legend-color {
-            width: 20px;
-            height: 3px;
-            margin-right: 8px;
-        }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        th {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 12px;
-            text-align: left;
-            font-weight: 600;
-        }
-        
-        td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-        
-        tr:hover {
-            background: #f8f9fa;
-        }
-        
-        .highlight-row {
-            background: #e8f4f8 !important;
-            font-weight: bold;
-        }
-        
-        .status-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            font-weight: 600;
-        }
-        
-        .status-breakeven {
-            background: #ffc107;
-            color: #000;
-        }
-        
-        .status-optimal {
-            background: #4caf50;
-            color: white;
-        }
-        
-        .status-current {
-            background: #667eea;
-            color: white;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Accelerated Revenue Share Calculator (Single File)</title>
+  <style>
+    :root {
+      --bg:#0f1220; --panel:#171a2b; --muted:#8a93a6; --text:#e8ecf8; --accent:#7aa2ff;
+      --green:#5fd08b; --yellow:#ffd166; --red:#ff6b6b; --purple:#b388ff;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin:0; padding:24px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      background: radial-gradient(1200px 800px at 20% -10%, #1d2342 0%, #0f1220 60%);
+      color: var(--text);
+    }
+    h1 { margin: 0 0 8px; font-weight: 700; letter-spacing: 0.2px; }
+    .sub { color: var(--muted); margin-bottom: 24px; }
+    .wrap {
+      display:grid; grid-template-columns: 360px 1fr; gap: 20px; align-items:start;
+    }
+    .card { background: linear-gradient(180deg,#1a2040, #151a30); border: 1px solid rgba(255,255,255,.06);
+      border-radius: 16px; padding: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .stack { display:flex; flex-direction:column; gap: 12px; }
+    .row { display:grid; grid-template-columns: 1fr 140px; gap: 10px; align-items:center; }
+    .row label { color: var(--muted); font-size: 13px; }
+    input[type="number"]{
+      width: 100%; padding: 10px 12px; border-radius: 10px; background: #0e1325; color: var(--text);
+      border: 1px solid rgba(255,255,255,.08); outline: none;
+    }
+    input[type="range"]{ width: 100%; }
+    .slider-row { display:grid; grid-template-columns: 1fr auto; gap: 10px; align-items:center; }
+    .badge { display:inline-block; padding:6px 10px; border-radius:999px; background:#0e1325; border:1px solid rgba(255,255,255,.07); font-size:12px; color: var(--muted); }
+    .grid { width: 100%; border-collapse: collapse; }
+    .grid th, .grid td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 13px; }
+    .grid th { text-align:left; color: var(--muted); font-weight: 600; }
+    .grid tr.highlight { background: rgba(122,162,255,.08); }
+    .bar {
+      display:flex; height: 28px; overflow:hidden; border-radius: 999px; background: #0e1325; border:1px solid rgba(255,255,255,.06);
+    }
+    .bar .your { background: var(--purple); display:flex; align-items:center; justify-content:center; font-size:12px; }
+    .bar .client { background: var(--green); display:flex; align-items:center; justify-content:center; font-size:12px; flex:1; }
+    canvas { width: 100%; height: 240px; background:#0f1328; border-radius: 12px; border:1px solid rgba(255,255,255,.06); }
+    .muted { color: var(--muted); }
+    .ok { color: var(--green); }
+    .fail { color: var(--red); }
+    .btn { cursor:pointer; background: var(--accent); border:none; color:#0b1022; padding: 10px 14px; border-radius: 10px; font-weight: 700; }
+    .note { font-size: 12px; color: var(--muted); }
+    @media (max-width: 980px){ .wrap{ grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Visual Revenue Share Calculator</h1>
-        <p class="subtitle">Progressive model with visual split analysis</p>
-        
-        <div class="notice" id="noticeBox">
-            Loading...
+  <h1>Accelerated Revenue Share Calculator</h1>
+  <div class="sub">Python model → JavaScript, single-file. Define inputs and compute platform & customer shares with accelerated bands.</div>
+
+  <div class="wrap">
+    <!-- LEFT: Inputs -->
+    <div class="card stack">
+      <div class="row">
+        <label for="target">Target Annual Revenue (band size, T)</label>
+        <input id="target" type="number" step="1000" value="200000" min="1000">
+      </div>
+      <div class="row">
+        <label for="gross">Gross Revenue</label>
+        <input id="gross" type="number" step="1000" value="350000" min="0">
+      </div>
+      <div class="stack">
+        <div class="slider-row">
+          <label for="invSlider" id="invLabel">Inventory Exposure (%) — Allowed: 25%–100%</label>
+          <span class="badge"><span id="invDisplay">75</span>%</span>
         </div>
-        
-        <div class="grid">
-            <div class="card">
-                <h3>Input Parameters</h3>
-                
-                <div class="input-group">
-                    <label>Annual Passengers (PAX)</label>
-                    <input type="number" id="pax" value="200000" step="10000">
-                </div>
-                
-                <div class="input-group">
-                    <label>Minimum License Fee ($)</label>
-                    <input type="number" id="license" value="60000" step="5000">
-                </div>
-                
-                <div class="input-group">
-                    <label>Target Annual Revenue ($)</label>
-                    <input type="number" id="target" value="150000" step="10000">
-                </div>
-                
-                <div class="input-group">
-                    <label id="invLabel">Inventory Exposure (%)</label>
-                    <input type="number" id="inv" value="70" step="5">
-                    <input type="range" id="invSlider" min="5" max="100" step="5" value="70">
-                </div>
-                
-                <div class="input-group">
-                    <label>Total Revenue Generated</label>
-                    <input type="number" id="totalRev" value="0" readonly style="background: #f0f0f0;">
-                </div>
-            </div>
-            
-            <div class="card">
-                <h3>Revenue Analysis</h3>
-                
-                <div class="result-box">
-                    <div class="result-item">
-                        <span>Total Revenue:</span>
-                        <span id="dispTotal">$0</span>
-                    </div>
-                    <div class="result-item">
-                        <span>Your Revenue:</span>
-                        <span id="dispYours">$0</span>
-                    </div>
-                    <div class="result-item">
-                        <span>Client Revenue:</span>
-                        <span id="dispClient">$0</span>
-                    </div>
-                    <div class="result-item total">
-                        <span>Revenue Split:</span>
-                        <span id="dispSplit">0% / 0%</span>
-                    </div>
-                </div>
-                
-                <div class="visual-split">
-                    <h4 style="margin-bottom: 15px; color: #333;">Visual Revenue Split</h4>
-                    <div class="split-bar">
-                        <div class="your-portion" id="yourBar">
-                            Your Share
-                        </div>
-                        <div class="client-portion" id="clientBar">
-                            Client Share
-                        </div>
-                    </div>
-                    <div class="split-details">
-                        <div class="split-detail your-detail">
-                            <div class="split-label">Your Portion</div>
-                            <div class="split-value" id="yourValue">$0</div>
-                        </div>
-                        <div class="split-detail client-detail">
-                            <div class="split-label">Client Portion</div>
-                            <div class="split-value" id="clientValue">$0</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h3>Revenue Share Analysis Chart</h3>
-            <div class="chart-container">
-                <canvas id="revenueChart"></canvas>
-                <div class="chart-legend">
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #ffc107;"></div>
-                        <span>Break-even Point</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #4caf50;"></div>
-                        <span>Optimal Point</span>
-                    </div>
-                    <div class="legend-item">
-                        <div class="legend-color" style="background: #667eea;"></div>
-                        <span>Current Selection</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="card">
-            <h3>Revenue Schedule by Inventory Level</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Inventory %</th>
-                        <th>Total Revenue</th>
-                        <th>Your Revenue</th>
-                        <th>Client Revenue</th>
-                        <th>Split Ratio</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
+        <input id="invSlider" type="range" min="25" max="100" step="1" value="75" oninput="syncInvFromSlider(this.value)">
+        <input id="inv" type="number" min="25" max="100" step="1" value="75" oninput="syncInvFromBox(this.value)">
+      </div>
+
+      <button class="btn" onclick="update()">Recalculate</button>
+
+      <div class="note" id="noticeBox"></div>
     </div>
-    
-    <script>
-        // Revenue base data
-        const baseRev = {
-            5: 28571, 10: 57143, 15: 85714, 20: 114286,
-            25: 142857, 30: 171429, 35: 200000, 40: 228571,
-            45: 257143, 50: 285714, 55: 314286, 60: 342857,
-            65: 371429, 70: 400000, 75: 428571, 80: 457143,
-            85: 485714, 90: 514286, 95: 542857, 100: 571429
-        };
-        
-        let chartInstance = null;
-        
-        function getRev(pax, inv) {
-            const scale = pax / 200000;
-            return Math.round((baseRev[inv] || 400000) * scale);
+
+    <!-- RIGHT: Results -->
+    <div class="card stack">
+      <div class="row">
+        <div>
+          <div class="muted">Gross Revenue</div>
+          <div id="dispTotal" style="font-size:22px; font-weight:800;">$0</div>
+        </div>
+        <div>
+          <div class="muted">Split (Your% / Client%)</div>
+          <div id="dispSplit" style="font-size:22px; font-weight:800;">0% / 0%</div>
+        </div>
+      </div>
+      <div class="bar">
+        <div id="yourBar" class="your" style="width:0%;">Your 0%</div>
+        <div id="clientBar" class="client">Client 100%</div>
+      </div>
+      <div class="row">
+        <div>
+          <div class="muted">Your Share</div>
+          <div id="yourValue" style="font-size:20px; font-weight:700;">$0</div>
+        </div>
+        <div>
+          <div class="muted">Client Share</div>
+          <div id="clientValue" style="font-size:20px; font-weight:700;">$0</div>
+        </div>
+      </div>
+      <canvas id="revenueChart" width="900" height="240"></canvas>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card" style="margin-top:20px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+      <div class="muted">Accelerated Revenue Share Table (rows=bands relative to T; columns=inventory)</div>
+      <div class="badge">T defines band size</div>
+    </div>
+    <table class="grid" id="lookup">
+      <thead>
+        <tr>
+          <th>Revenue Band (by T)</th>
+          <th>25%</th><th>50%</th><th>75%</th><th>100%</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+  </div>
+
+  <script>
+    // ===== CONFIG from Python =====
+    const CONFIG = {
+      STEP_COUNT_ABOVE_THRESHOLD: 5,
+      MIN_INVENTORY_PCT: 25,
+      MAX_INVENTORY_PCT: 100,
+      BASE_MAX_SHARE_PCT: 50,
+      PER_STEP_BASE: 1.0,
+      BAND_ACCEL: 0.25,
+      INV_ACCEL: 1.25,
+      INVENTORY_DENOM: 130
+    };
+    const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
+
+    function validateInventory(icp, cfg = CONFIG) {
+      if (icp < cfg.MIN_INVENTORY_PCT || icp > cfg.MAX_INVENTORY_PCT) {
+        throw new Error(`Inventory must be between ${cfg.MIN_INVENTORY_PCT}% and ${cfg.MAX_INVENTORY_PCT}%. Got ${icp}%.`);
+      }
+    }
+    function revenueStepPoints(grossRevenue, T) {
+      if (grossRevenue <= T) return 0;
+      const delta = grossRevenue - T;
+      return Math.ceil(delta / T);
+    }
+    function totalStepReduction(step, icp, cfg = CONFIG) {
+      const invScale = clamp((icp - cfg.MIN_INVENTORY_PCT) / (cfg.MAX_INVENTORY_PCT - cfg.MIN_INVENTORY_PCT), 0, 1);
+      const bandTerm = cfg.PER_STEP_BASE * (1 + cfg.BAND_ACCEL * Math.max(step - 1, 0));
+      return step * bandTerm * (1 + cfg.INV_ACCEL * invScale);
+    }
+    function platformPercent(grossRevenue, inventoryPct, T, cfg = CONFIG) {
+      validateInventory(inventoryPct, cfg);
+      const step = revenueStepPoints(grossRevenue, T);
+      const preInventoryPct = Math.max(0, cfg.BASE_MAX_SHARE_PCT - totalStepReduction(step, inventoryPct, cfg));
+      const multiplier = Math.max(0, 1 - inventoryPct / cfg.INVENTORY_DENOM);
+      return Math.max(0, preInventoryPct * multiplier);
+    }
+    function splitAmounts(grossRevenue, inventoryPct, T, cfg = CONFIG) {
+      const pct = platformPercent(grossRevenue, inventoryPct, T, cfg);
+      const platform_amount = grossRevenue * (pct / 100);
+      const customer_amount = grossRevenue - platform_amount;
+      return { pct, platform_amount, customer_amount };
+    }
+    function bandLabel(step, T, includePlusRow = true, cfg = CONFIG) {
+      if (step === 0) return `≤ $${T.toLocaleString()}`;
+      const lo = T + (step - 1) * T + 1;
+      const hi = T + step * T;
+      if (includePlusRow && step === cfg.STEP_COUNT_ABOVE_THRESHOLD) return `$${lo.toLocaleString()}+`;
+      return `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
+    }
+
+    // ===== UI glue =====
+    function fmt(n){ return '$' + Math.round(n).toLocaleString(); }
+    function syncInvFromSlider(v){ document.getElementById('inv').value = v; document.getElementById('invDisplay').textContent = v; update(); }
+    function syncInvFromBox(v){
+      const iv = Math.min(Math.max(parseInt(v||0,10), CONFIG.MIN_INVENTORY_PCT), CONFIG.MAX_INVENTORY_PCT);
+      document.getElementById('inv').value = iv;
+      document.getElementById('invSlider').value = iv;
+      document.getElementById('invDisplay').textContent = iv;
+      update();
+    }
+
+    function drawChart_PythonModel(T, currentInv) {
+      const canvas = document.getElementById('revenueChart');
+      const ctx = canvas.getContext('2d');
+      const gross = parseFloat(document.getElementById('gross').value) || 0;
+
+      canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight;
+      const w = canvas.width, h = canvas.height, pad = 40, cw = w - pad*2, ch = h - pad*2;
+
+      // We'll vary inventory from 25%..100% and plot your & client amounts
+      let maxVal = 0;
+      for (let inv = CONFIG.MIN_INVENTORY_PCT; inv <= 100; inv += 5) {
+        const res = splitAmounts(gross, inv, T);
+        maxVal = Math.max(maxVal, res.platform_amount, res.customer_amount);
+      }
+
+      ctx.clearRect(0,0,w,h);
+      // axes
+      ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,h-pad); ctx.lineTo(w-pad,h-pad); ctx.stroke();
+
+      // grid
+      ctx.strokeStyle = 'rgba(255,255,255,.08)';
+      for (let i=0;i<=5;i++){
+        const y = pad + (ch/5)*i;
+        ctx.beginPath(); ctx.moveTo(pad,y); ctx.lineTo(w-pad,y); ctx.stroke();
+      }
+
+      const xForInv = inv => pad + ((inv - CONFIG.MIN_INVENTORY_PCT) / (100 - CONFIG.MIN_INVENTORY_PCT)) * cw;
+      const yForVal = v => h - pad - (v / maxVal) * ch;
+
+      // platform line
+      ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = '#b388ff';
+      let first = true;
+      for (let inv = CONFIG.MIN_INVENTORY_PCT; inv <= 100; inv += 5) {
+        const res = splitAmounts(gross, inv, T);
+        const x = xForInv(inv), y = yForVal(res.platform_amount);
+        if(first){ ctx.moveTo(x,y); first=false;} else { ctx.lineTo(x,y); }
+      }
+      ctx.stroke();
+
+      // client line
+      ctx.beginPath(); ctx.lineWidth = 2; ctx.strokeStyle = '#5fd08b'; first = true;
+      for (let inv = CONFIG.MIN_INVENTORY_PCT; inv <= 100; inv += 5) {
+        const res = splitAmounts(gross, inv, T);
+        const x = xForInv(inv), y = yForVal(res.customer_amount);
+        if(first){ ctx.moveTo(x,y); first=false;} else { ctx.lineTo(x,y); }
+      }
+      ctx.stroke();
+
+      // guideline for currentInv
+      const currX = xForInv(currentInv);
+      ctx.setLineDash([6,6]); ctx.strokeStyle = '#7aa2ff';
+      ctx.beginPath(); ctx.moveTo(currX,pad); ctx.lineTo(currX,h-pad); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+
+    function update(){
+      const T = Math.max(1, parseFloat(document.getElementById('target').value) || 200000);
+      let inv = parseInt(document.getElementById('inv').value) || 75;
+      inv = Math.min(Math.max(inv, CONFIG.MIN_INVENTORY_PCT), CONFIG.MAX_INVENTORY_PCT);
+      document.getElementById('inv').value = inv;
+      document.getElementById('invSlider').value = inv;
+      document.getElementById('invDisplay').textContent = inv;
+
+      const gross = parseFloat(document.getElementById('gross').value) || 0;
+
+      document.getElementById('invLabel').textContent = `Inventory Exposure (%) — Allowed: ${CONFIG.MIN_INVENTORY_PCT}%–${CONFIG.MAX_INVENTORY_PCT}%`;
+      document.getElementById('noticeBox').innerHTML = [
+        `<strong>Model:</strong> Base 50% → minus band+inventory reduction → inventory multiplier (1 - ICP / ${CONFIG.INVENTORY_DENOM})`,
+        `Bands are sized by <em>T</em> = $${T.toLocaleString()} (Target Annual Revenue); 5 steps above the base row.`
+      ].join('<br>');
+
+      const res = splitAmounts(gross, inv, T);
+      const yPct = Math.round(res.pct);
+      const cPct = Math.max(0, 100 - yPct);
+
+      document.getElementById('dispTotal').textContent = '$' + Math.round(gross).toLocaleString();
+      document.getElementById('dispSplit').textContent = `${yPct}% / ${cPct}%`;
+      document.getElementById('yourValue').textContent = fmt(res.platform_amount);
+      document.getElementById('clientValue').textContent = fmt(res.customer_amount);
+
+      const yourBar = document.getElementById('yourBar');
+      const clientBar = document.getElementById('clientBar');
+      yourBar.style.width = `${yPct}%`; yourBar.textContent = `Your ${yPct}%`; clientBar.textContent = `Client ${cPct}%`;
+
+      // Table
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      const inventoryCols = [25, 50, 75, 100];
+      for (let s = 0; s <= CONFIG.STEP_COUNT_ABOVE_THRESHOLD; s++){
+        const row = document.createElement('tr');
+        const bandCell = document.createElement('td');
+        bandCell.textContent = bandLabel(s, T, true);
+        row.appendChild(bandCell);
+        for (const icp of inventoryCols){
+          const stepGross = s === 0 ? T : (T + s*T); // a representative gross inside the band
+          const pre = Math.max(0, CONFIG.BASE_MAX_SHARE_PCT - totalStepReduction(s, icp, CONFIG));
+          const finalPct = Math.max(0, pre * Math.max(0, 1 - icp / CONFIG.INVENTORY_DENOM));
+          const cell = document.createElement('td');
+          cell.textContent = finalPct.toFixed(2) + '%';
+          row.appendChild(cell);
         }
-        
-        function calc(total, lic, tgt) {
-            if (total < lic) {
-                return { yours: 0, client: 0, brackets: [] };
-            }
-            
-            if (total === lic) {
-                return { yours: lic, client: 0, brackets: [] };
-            }
-            
-            if (total <= lic * 2) {
-                return { yours: lic, client: total - lic, brackets: [] };
-            }
-            
-            if (total < tgt * 2) {
-                const half = Math.round(total / 2);
-                return { yours: half, client: half, brackets: [] };
-            }
-            
-            let yours = tgt;
-            let brackets = [];
-            let remain = total - tgt;
-            let ratio = 3;
-            const bSize = tgt * 0.1;
-            let bStart = tgt;
-            
-            for (let i = 0; i < 10 && remain > 0; i++) {
-                const chunk = Math.min(remain, bSize);
-                const yChunk = chunk / (ratio + 1);
-                const cChunk = chunk * ratio / (ratio + 1);
-                
-                yours += yChunk;
-                brackets.push({
-                    start: bStart,
-                    end: bStart + chunk,
-                    ratio: ratio,
-                    yours: Math.round(yChunk),
-                    client: Math.round(cChunk)
-                });
-                
-                bStart += chunk;
-                remain -= chunk;
-                ratio *= 2;
-            }
-            
-            return {
-                yours: Math.round(yours),
-                client: Math.round(total - yours),
-                brackets: brackets
-            };
-        }
-        
-        function drawChart(pax, lic, tgt, currentInv, minInv, optimalInv) {
-            const canvas = document.getElementById('revenueChart');
-            const ctx = canvas.getContext('2d');
-            
-            // Set canvas size
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
-            
-            const width = canvas.width;
-            const height = canvas.height;
-            const padding = 40;
-            const chartWidth = width - padding * 2;
-            const chartHeight = height - padding * 2;
-            
-            // Clear canvas
-            ctx.clearRect(0, 0, width, height);
-            
-            // Find max revenue for scale
-            let maxRev = 0;
-            for (let i = minInv; i <= 100; i += 5) {
-                const rev = getRev(pax, i);
-                if (rev > maxRev) maxRev = rev;
-            }
-            
-            // Draw axes
-            ctx.strokeStyle = '#ddd';
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(padding, padding);
-            ctx.lineTo(padding, height - padding);
-            ctx.lineTo(width - padding, height - padding);
-            ctx.stroke();
-            
-            // Draw grid lines
-            ctx.strokeStyle = '#f0f0f0';
-            for (let i = 0; i <= 5; i++) {
-                const y = padding + (chartHeight / 5) * i;
-                ctx.beginPath();
-                ctx.moveTo(padding, y);
-                ctx.lineTo(width - padding, y);
-                ctx.stroke();
-            }
-            
-            // Draw your revenue line
-            ctx.strokeStyle = '#667eea';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            let firstPoint = true;
-            
-            for (let i = minInv; i <= 100; i += 5) {
-                const rev = getRev(pax, i);
-                const result = calc(rev, lic, tgt);
-                const x = padding + ((i - minInv) / (100 - minInv)) * chartWidth;
-                const y = height - padding - (result.yours / maxRev) * chartHeight;
-                
-                if (firstPoint) {
-                    ctx.moveTo(x, y);
-                    firstPoint = false;
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.stroke();
-            
-            // Draw client revenue line
-            ctx.strokeStyle = '#4caf50';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            firstPoint = true;
-            
-            for (let i = minInv; i <= 100; i += 5) {
-                const rev = getRev(pax, i);
-                const result = calc(rev, lic, tgt);
-                const x = padding + ((i - minInv) / (100 - minInv)) * chartWidth;
-                const y = height - padding - (result.client / maxRev) * chartHeight;
-                
-                if (firstPoint) {
-                    ctx.moveTo(x, y);
-                    firstPoint = false;
-                } else {
-                    ctx.lineTo(x, y);
-                }
-            }
-            ctx.stroke();
-            
-            // Mark break-even point
-            const breakX = padding;
-            ctx.strokeStyle = '#ffc107';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath();
-            ctx.moveTo(breakX, padding);
-            ctx.lineTo(breakX, height - padding);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            
-            // Mark optimal point
-            if (optimalInv >= minInv) {
-                const optX = padding + ((optimalInv - minInv) / (100 - minInv)) * chartWidth;
-                ctx.strokeStyle = '#4caf50';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.moveTo(optX, padding);
-                ctx.lineTo(optX, height - padding);
-                ctx.stroke();
-                ctx.setLineDash([]);
-            }
-            
-            // Mark current point
-            if (currentInv >= minInv) {
-                const currX = padding + ((currentInv - minInv) / (100 - minInv)) * chartWidth;
-                ctx.strokeStyle = '#667eea';
-                ctx.lineWidth = 2;
-                ctx.setLineDash([5, 5]);
-                ctx.beginPath();
-                ctx.moveTo(currX, padding);
-                ctx.lineTo(currX, height - padding);
-                ctx.stroke();
-                ctx.setLineDash([]);
-                
-                // Draw current point circle
-                const rev = getRev(pax, currentInv);
-                const result = calc(rev, lic, tgt);
-                const y = height - padding - (result.yours / maxRev) * chartHeight;
-                
-                ctx.fillStyle = '#667eea';
-                ctx.beginPath();
-                ctx.arc(currX, y, 5, 0, 2 * Math.PI);
-                ctx.fill();
-            }
-            
-            // Draw labels
-            ctx.fillStyle = '#666';
-            ctx.font = '12px sans-serif';
-            ctx.textAlign = 'center';
-            
-            // X-axis labels
-            for (let i = minInv; i <= 100; i += 20) {
-                if (i <= 100) {
-                    const x = padding + ((i - minInv) / (100 - minInv)) * chartWidth;
-                    ctx.fillText(i + '%', x, height - padding + 20);
-                }
-            }
-            
-            // Y-axis labels
-            ctx.textAlign = 'right';
-            for (let i = 0; i <= 5; i++) {
-                const value = Math.round((maxRev / 5) * (5 - i) / 1000);
-                const y = padding + (chartHeight / 5) * i;
-                ctx.fillText('$' + value + 'K', padding - 10, y + 5);
-            }
-        }
-        
-        function update() {
-            const pax = parseInt(document.getElementById('pax').value) || 200000;
-            const lic = parseInt(document.getElementById('license').value) || 60000;
-            const tgt = parseInt(document.getElementById('target').value) || 150000;
-            let inv = parseInt(document.getElementById('inv').value) || 70;
-            
-            // Find minimum inventory
-            let minInv = 100;
-            for (let i = 5; i <= 100; i += 5) {
-                if (getRev(pax, i) >= lic) {
-                    minInv = i;
-                    break;
-                }
-            }
-            
-            // Find optimal inventory (where target is reached with good client ratio)
-            let optimalInv = 100;
-            for (let i = minInv; i <= 100; i += 5) {
-                const rev = getRev(pax, i);
-                if (rev >= tgt * 2) {
-                    optimalInv = i;
-                    break;
-                }
-            }
-            
-            // Set slider constraints
-            document.getElementById('inv').min = minInv;
-            document.getElementById('invSlider').min = minInv;
-            
-            if (inv < minInv) {
-                inv = minInv;
-                document.getElementById('inv').value = inv;
-                document.getElementById('invSlider').value = inv;
-            }
-            
-            // Update notice
-            const noticeHTML = [
-                '<strong>Key Points:</strong>',
-                '🔸 Break-even at ' + minInv + '% inventory ($' + lic.toLocaleString() + ' revenue)',
-                '🔸 Optimal point at ' + optimalInv + '% inventory (target achieved with progressive ratios)',
-                '🔸 Target requires $' + (tgt * 2).toLocaleString() + ' total revenue for fair split'
-            ].join('<br>');
-            document.getElementById('noticeBox').innerHTML = noticeHTML;
-            
-            document.getElementById('invLabel').textContent = 'Inventory Exposure (%) - Min: ' + minInv + '%';
-            
-            // Calculate
-            const total = getRev(pax, inv);
-            const result = calc(total, lic, tgt);
-            
-            // Update displays
-            document.getElementById('totalRev').value = total;
-            document.getElementById('dispTotal').textContent = '$' + total.toLocaleString();
-            document.getElementById('dispYours').textContent = '$' + result.yours.toLocaleString();
-            document.getElementById('dispClient').textContent = '$' + result.client.toLocaleString();
-            
-            const yPct = total > 0 ? Math.round(result.yours / total * 100) : 0;
-            const cPct = total > 0 ? Math.round(result.client / total * 100) : 0;
-            document.getElementById('dispSplit').textContent = yPct + '% / ' + cPct + '%';
-            
-            // Update visual split bar
-            const yourBar = document.getElementById('yourBar');
-            const clientBar = document.getElementById('clientBar');
-            yourBar.style.width = yPct + '%';
-            yourBar.innerHTML = 'Your ' + yPct + '%';
-            clientBar.innerHTML = 'Client ' + cPct + '%';
-            
-            // Update split values
-            document.getElementById('yourValue').textContent = '$' + result.yours.toLocaleString();
-            document.getElementById('clientValue').textContent = '$' + result.client.toLocaleString();
-            
-            // Draw chart
-            drawChart(pax, lic, tgt, inv, minInv, optimalInv);
-            
-            // Update table
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            
-            for (let i = minInv; i <= 100; i += 5) {
-                const rev = getRev(pax, i);
-                const res = calc(rev, lic, tgt);
-                const row = tbody.insertRow();
-                
-                if (i === inv) row.className = 'highlight-row';
-                
-                const cell1 = row.insertCell();
-                const cell2 = row.insertCell();
-                const cell3 = row.insertCell();
-                const cell4 = row.insertCell();
-                const cell5 = row.insertCell();
-                const cell6 = row.insertCell();
-                
-                cell1.textContent = i + '%';
-                cell2.textContent = '$' + rev.toLocaleString();
-                cell3.textContent = '$' + res.yours.toLocaleString();
-                cell4.textContent = '$' + res.client.toLocaleString();
-                
-                const y = rev > 0 ? Math.round(res.yours / rev * 100) : 0;
-                const c = rev > 0 ? Math.round(res.client / rev * 100) : 0;
-                cell5.textContent = y + '/' + c;
-                
-                // Status badges
-                let statusHTML = '';
-                if (i === minInv) {
-                    statusHTML = '<span class="status-badge status-breakeven">Break-even</span>';
-                } else if (i === optimalInv) {
-                    statusHTML = '<span class="status-badge status-optimal">Optimal</span>';
-                } else if (i === inv) {
-                    statusHTML = '<span class="status-badge status-current">Current</span>';
-                }
-                cell6.innerHTML = statusHTML;
-            }
-        }
-        
-        // Events
-        document.getElementById('pax').addEventListener('input', update);
-        document.getElementById('license').addEventListener('input', update);
-        document.getElementById('target').addEventListener('input', update);
-        document.getElementById('inv').addEventListener('input', function() {
-            document.getElementById('invSlider').value = this.value;
-            update();
-        });
-        document.getElementById('invSlider').addEventListener('input', function() {
-            document.getElementById('inv').value = this.value;
-            update();
-        });
-        update();
-    </script>
+        tbody.appendChild(row);
+      }
+
+      // Chart
+      drawChart_PythonModel(T, inv);
+    }
+
+    // ===== Self-tests =====
+    function almostEqual(a,b,eps=1e-6){ return Math.abs(a-b) <= eps; }
+    function addTestLine(msg, ok){
+      const li = document.createElement('li');
+      li.textContent = (ok ? '✓ ' : '✗ ') + msg;
+      li.className = ok ? 'ok' : 'fail';
+      document.getElementById('testOutput').appendChild(li);
+    }
+    function runSelfTests(){
+      document.getElementById('testOutput').innerHTML = '';
+      const status = document.getElementById('testStatus');
+      status.textContent = 'Running…';
+
+      // Known Python result for T=200000, gross=350000, inv=75
+      const expectedPct = 20.37820512820513;
+      const expectedYour = 71323.71794871797;
+      const expectedClient = 278676.282051282;
+
+      const T = 200000, gross = 350000, icp = 75;
+      const res = splitAmounts(gross, icp, T);
+
+      addTestLine(`pct ≈ ${expectedPct.toFixed(10)} (got ${res.pct.toFixed(10)})`, almostEqual(res.pct, expectedPct, 1e-9));
+      addTestLine(`your ≈ ${expectedYour.toFixed(4)} (got ${res.platform_amount.toFixed(4)})`, almostEqual(res.platform_amount, expectedYour, 1e-6));
+      addTestLine(`client ≈ ${expectedClient.toFixed(4)} (got ${res.customer_amount.toFixed(4)})`, almostEqual(res.customer_amount, expectedClient, 1e-6));
+
+      // Quick bounds tests for inventory
+      let threwLow=false, threwHigh=false;
+      try{ platformPercent(100000, 10, 200000); } catch(e){ threwLow=true; }
+      try{ platformPercent(100000, 150, 200000); } catch(e){ threwHigh=true; }
+      addTestLine('rejects inventory below 25%', threwLow);
+      addTestLine('rejects inventory above 100%', threwHigh);
+
+      status.textContent = 'Done';
+    }
+
+    // boot
+    window.addEventListener('DOMContentLoaded', () => { update(); runSelfTests(); });
+  </script>
 </body>
 </html>
