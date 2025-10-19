@@ -51,6 +51,32 @@ canvas{width:100%;height:260px;background:#0f1328;border-radius:12px;border:1px 
 .range-arrow{color:var(--muted);font-size:12px;opacity:0.7;}
 .grid th:first-child, .grid td:first-child{border-right:1px solid rgba(255,255,255,.15);}
 .grid th:nth-child(2), .grid td:nth-child(2){border-left:1px solid rgba(255,255,255,.15);}
+@media (max-width: 768px) {
+  body{padding:12px;}
+  .wrap{grid-template-columns:1fr;gap:16px;}
+  .card{padding:14px;}
+  .mobile-reorder{order:2;}
+  .mobile-cumulative{order:3;display:block!important;}
+  .mobile-table{order:4;}
+  .card:first-child .stack:last-child{display:none;}
+  .row{grid-template-columns:1fr 1fr;gap:8px;}
+  .row > div{text-align:center;}
+  .row .muted{font-size:11px;}
+  .input-with-arrows{grid-column:1/-1;}
+  .input-with-arrows input{font-size:16px;}
+  .dual-track{height:60px;padding:16px 12px;}
+  .dual-track .rail{top:28px;left:12px;right:12px;}
+  .dual-track .ticks{top:24px;left:12px;right:12px;}
+  .thumb{top:20px;width:20px;height:20px;}
+  canvas{height:200px;}
+  #accumTotals{height:auto;min-height:200px;}
+  #accumTotalsMobile{height:auto;padding:16px;}
+  .mobile-table{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .grid{font-size:12px;min-width:600px;}
+  .grid th, .grid td{padding:8px 12px;white-space:nowrap;}
+  h1{font-size:24px;}
+  .value-large{font-size:18px;}
+}
 </style>
 </head>
 <body>
@@ -91,7 +117,7 @@ canvas{width:100%;height:260px;background:#0f1328;border-radius:12px;border:1px 
     </div>
   </div>
   
-  <div class="card stack">
+  <div class="card stack mobile-reorder">
     <div class="flex-between-center">
       <div class="muted">Tier Explorer (per-tier simulation)</div>
     </div>
@@ -104,7 +130,7 @@ canvas{width:100%;height:260px;background:#0f1328;border-radius:12px;border:1px 
     </div>
     
     <div class="muted" id="bandInfo">
-      <div>Selected band: <span id="stepLabel">0</span> (rate: <span id="stepRate">0%</span>)</div>
+      <div>Selected Tier: <span id="stepLabel">0</span> (rate: <span id="stepRate">0%</span>)</div>
       <div>Range: <span id="stepRange">$0 – $0</span></div>
     </div>
     
@@ -116,14 +142,12 @@ canvas{width:100%;height:260px;background:#0f1328;border-radius:12px;border:1px 
     <div class="bar"><div id="yourBar" class="your">Fareplace 0%</div><div id="clientBar" class="client">Client 100%</div></div>
     
     <div class="stack">
-      <div class="muted" id="discountChartLabel">Per-step discount from 45% (current inventory)</div>
+      <div class="muted" id="discountChartLabel"></div>
       <canvas id="discountChart" width="900" height="260"></canvas>
     </div>
   </div>
 </div>
-<div class="card mt-20">
-  <!-- <div class="muted">Revenue Share model based on revenue and exposed inventory (seats) %</div> -->
-  <!-- <div id="tableModeBadge" class="badge">Inventory exposure ranges: 0→19%, 20→39%, 40→59%, 60→79%, 80%. 0% is always 50%.</div> -->
+<div class="card mt-20 mobile-table">
   <table class="grid" id="lookup">
     <thead>
       <tr>
@@ -141,6 +165,19 @@ canvas{width:100%;height:260px;background:#0f1328;border-radius:12px;border:1px 
     </thead>
     <tbody id="tableBody"></tbody>
   </table>
+</div>
+<div class="card mobile-cumulative" style="display:none;">
+  <div class="stack">
+    <div class="muted">Revenue Share Breakdown</div>
+    <div class="accum" id="accumTotalsMobile">
+      <div class="line"><span>Gross Revenue</span><span class="val" id="accGrossMobile">$0</span></div>
+      <div class="line"><span>Client Portion</span><span class="val" id="accClientMobile">$0</span></div>
+      <div class="line"><span>Fareplace Portion</span><span class="val" id="accYourRevMobile">$0</span></div>
+      <div class="line" id="licenseLineMobile"><span>License (Annual)</span><span class="val" id="accLicenseMobile">$0</span></div>
+      <div class="muted" id="licenseNoteMobile" style="display:none; font-size:11px; color:var(--yellow); margin:2px 0 4px 0; padding-left:4px;">⚠️ Inventory exposure below 20%</div>
+      <div class="line"><span>Fareplace Total, incl. license</span><span class="val" id="accYourTotalMobile">$0</span></div>
+    </div>
+  </div>
 </div>
 <script>
 const CONFIG={
@@ -179,8 +216,8 @@ function drawDiscountChart(){const canvas=document.getElementById('discountChart
 function updateTable(){const tbody=document.getElementById('tableBody');tbody.innerHTML='';const exposures=[0,20,40,60,80];for(let s=0;s<CONFIG.BANDS;s++){const row=document.createElement('tr');row.dataset.step=String(s);if(s===state.band)row.className='highlight';const bandCell=document.createElement('td');bandCell.textContent=bandLabel(s,state.T);row.appendChild(bandCell);exposures.forEach((icp)=>{const cell=document.createElement('td');const pct=(icp===0)?50:Math.round(bandPercent(s,icp));cell.textContent=pct+'%';row.appendChild(cell);});row.addEventListener('click',()=>{state.band=s;update();});tbody.appendChild(row);}}
 function updateNumbers(){const pctInt=Math.round(bandPercent(state.band,state.inv));const your=state.T*(pctInt/100);const client=state.T-your;document.getElementById('yourValue').textContent=fmt(your);document.getElementById('clientValue').textContent=fmt(client);document.getElementById('yourBar').style.width=`${pctInt}%`;document.getElementById('yourBar').textContent=`Fareplace ${pctInt}%`;document.getElementById('clientBar').textContent=`Client ${Math.max(0,100-pctInt)}%`;}
 function recomputeAccumulation(){const bandsCount=state.band+1;const gross=bandsCount*state.T;let yourTotal=0,clientTotal=0;const details=[];for(let s=0;s<=state.band;s++){const pct=Math.round(bandPercent(s,state.inv));const your=Math.round(state.T*(pct/100));const their=Math.round(state.T-your);yourTotal+=your;clientTotal+=their;const lbl=(s===0)?`≤ ${fmt(state.T)}`:`${fmt(s*state.T+1)} – ${fmt((s+1)*state.T)}`;details.push({s,pct,your,their,lbl});}return{gross,yourTotal,clientTotal,details};}
-function updateAccumTotals(){const {gross,yourTotal,clientTotal,details}=recomputeAccumulation();const license=(state.inv<CONFIG.MIN_INVENTORY_PCT)?Math.round(state.T*(CONFIG.LICENSE_FEE_PCT_OF_T/100)):0;const licenseBadge=document.getElementById('licenseBadge');licenseBadge.innerHTML=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'⚠️ License fee applied!':'✅ License fee is waived!';licenseBadge.className=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'on':'off';const yourInclLicense=yourTotal+license;const licenseLine=document.getElementById('licenseLine');const licenseNote=document.getElementById('licenseNote');if(license>0){licenseNote.style.display='block';}else{licenseNote.style.display='none';}document.getElementById('accGross').textContent=fmt(gross);document.getElementById('accClient').textContent=fmt(clientTotal);document.getElementById('accYourRev').textContent=fmt(yourTotal);document.getElementById('accLicense').textContent=fmt(license);document.getElementById('accYourTotal').textContent=fmt(yourInclLicense);}
-function update(){state.inv=parseInt(document.getElementById('invSlider').value,10)||0;document.getElementById('invDisplay').textContent=state.inv;const licenseBadge=document.getElementById('licenseBadge');licenseBadge.innerHTML=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'⚠️ License fee applied ':'✅ License fee waived';licenseBadge.className=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'on':'off';  const chartLabel=document.getElementById('discountChartLabel');const chartCanvas=document.getElementById('discountChart');const dualTrack=document.getElementById('dualTrack');const bandInfo=document.getElementById('bandInfo');if(state.inv===0){chartLabel.style.display='none';chartCanvas.style.opacity='0.3';chartCanvas.style.pointerEvents='none';dualTrack.style.opacity='0.3';dualTrack.style.pointerEvents='none';bandInfo.style.display='none';}else{chartLabel.style.display='block';chartLabel.textContent=`Per-step discount from ${CONFIG.BASE_MAX_SHARE_PCT}% (current inventory)`;chartCanvas.style.opacity='1';chartCanvas.style.pointerEvents='auto';dualTrack.style.opacity='1';dualTrack.style.pointerEvents='auto';bandInfo.style.display='block';}positionHandles();updateNumbers();updateTable();drawDiscountChart();updateAccumTotals();}
+function updateAccumTotals(){const {gross,yourTotal,clientTotal,details}=recomputeAccumulation();const license=(state.inv<CONFIG.MIN_INVENTORY_PCT)?Math.round(state.T*(CONFIG.LICENSE_FEE_PCT_OF_T/100)):0;const licenseBadge=document.getElementById('licenseBadge');licenseBadge.innerHTML=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'⚠️ License fee applied!':'✅ License fee is waived!';licenseBadge.className=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'on':'off';const yourInclLicense=yourTotal+license;const licenseLine=document.getElementById('licenseLine');const licenseNote=document.getElementById('licenseNote');const licenseLineMobile=document.getElementById('licenseLineMobile');const licenseNoteMobile=document.getElementById('licenseNoteMobile');if(license>0){licenseNote.style.display='block';if(licenseNoteMobile)licenseNoteMobile.style.display='block';}else{licenseNote.style.display='none';if(licenseNoteMobile)licenseNoteMobile.style.display='none';}document.getElementById('accGross').textContent=fmt(gross);document.getElementById('accClient').textContent=fmt(clientTotal);document.getElementById('accYourRev').textContent=fmt(yourTotal);document.getElementById('accLicense').textContent=fmt(license);document.getElementById('accYourTotal').textContent=fmt(yourInclLicense);if(document.getElementById('accGrossMobile')){document.getElementById('accGrossMobile').textContent=fmt(gross);document.getElementById('accClientMobile').textContent=fmt(clientTotal);document.getElementById('accYourRevMobile').textContent=fmt(yourTotal);document.getElementById('accLicenseMobile').textContent=fmt(license);document.getElementById('accYourTotalMobile').textContent=fmt(yourInclLicense);}}
+function update(){state.inv=parseInt(document.getElementById('invSlider').value,10)||0;document.getElementById('invDisplay').textContent=state.inv;const licenseBadge=document.getElementById('licenseBadge');licenseBadge.innerHTML=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'⚠️ License fee applied ':'✅ License fee waived';licenseBadge.className=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'on':'off';  const chartLabel=document.getElementById('discountChartLabel');const chartCanvas=document.getElementById('discountChart');const dualTrack=document.getElementById('dualTrack');const bandInfo=document.getElementById('bandInfo');if(state.inv===0){chartLabel.style.display='none';chartCanvas.style.opacity='0.3';chartCanvas.style.pointerEvents='none';dualTrack.style.opacity='0.3';dualTrack.style.pointerEvents='none';bandInfo.style.display='none';}else{chartLabel.style.display='block';chartLabel.textContent=`Per-step discount from ${CONFIG.BASE_MAX_SHARE_PCT}% (current inventory exposure)`;chartCanvas.style.opacity='1';chartCanvas.style.pointerEvents='auto';dualTrack.style.opacity='1';dualTrack.style.pointerEvents='auto';bandInfo.style.display='block';}positionHandles();updateNumbers();updateTable();drawDiscountChart();updateAccumTotals();}
 function onTargetFocus(){const el=document.getElementById('target');const raw=(el.value||'').replace(/[^\d]/g,'');el.value=raw;}
 function onTargetChangeManual(){const t=document.getElementById('target');const raw=(t.value||'').replace(/[^\d]/g,'');let value=raw?parseInt(raw,10):200000;value=Math.max(200000,value);value=Math.round(value/200000)*200000;state.T=value;t.value='$'+state.T.toLocaleString();updateButtonStates();update();}
 function incrementTarget(){let value=state.T+200000;state.T=value;document.getElementById('target').value='$'+state.T.toLocaleString();updateButtonStates();update();}
