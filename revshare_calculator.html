@@ -1,552 +1,193 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Tiered Revenue Share Calculator</title>
-  <style>
-    :root {
-      --bg:#0f1220; --panel:#171a2b; --muted:#8a93a6; --text:#e8ecf8; --accent:#7aa2ff;
-      --green:#5fd08b; --yellow:#ffd166; --purple:#b388ff; --track:#0e1325; --red:#ff7a7a;
-    }
-    * { box-sizing: border-box; }
-    body { margin:0; padding:24px; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-      background: radial-gradient(1200px 800px at 20% -10%, #1d2342 0%, #0f1220 60%); color: var(--text); }
-    h1 { margin: 0 0 8px; font-weight: 700; letter-spacing: 0.2px; }
-    .sub { color: var(--muted); margin-bottom: 24px; }
-    .wrap { display:grid; grid-template-columns: 420px 1fr; gap: 20px; align-items:start; }
-    .card { background: linear-gradient(180deg,#1a2040, #151a30); border: 1px solid rgba(255,255,255,.06);
-      border-radius: 16px; padding: 18px; box-shadow: 0 10px 30px rgba(0,0,0,.25); }
-    .stack { display:flex; flex-direction:column; gap: 14px; }
-    .row { display:grid; grid-template-columns: 1fr 200px; gap: 12px; align-items:center; }
-    .row label { color: var(--muted); font-size: 14px; }
-    input[type="text"]{
-      width: 100%; padding: 14px 14px; border-radius: 12px; background: #0e1325; color: var(--text);
-      border: 1px solid rgba(255,255,255,.10); outline: none; font-size: 18px; font-weight: 600;
-    }
-    input[type="range"]{ width: 100%; height: 36px; }
-    .muted { color: var(--muted); }
-    .badge { display:inline-block; padding:6px 12px; border-radius:999px; background:#0e1325; border:1px solid rgba(255,255,255,.10); font-size:13px; color: var(--muted); }
-    .bar { display:flex; height: 30px; overflow:hidden; border-radius: 999px; background: #0e1325; border:1px solid rgba(255,255,255,.08); }
-    .bar .your { background: var(--purple); display:flex; align-items:center; justify-content:center; font-size:13px; }
-    .bar .client { background: var(--green); display:flex; align-items:center; justify-content:center; font-size:13px; flex:1; }
-    .grid { width: 100%; border-collapse: collapse; }
-    .grid th, .grid td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,.08); font-size: 14px; }
-    .grid th { text-align:left; color: var(--muted); font-weight: 700; }
-    .grid tr.highlight { background: rgba(122,162,255,.18); }
-    .grid tr:hover { background: rgba(122,162,255,.10); cursor: pointer; }
-    .dual-track { position: relative; height: 76px; padding: 22px 14px; background: var(--track); border-radius: 14px;
-      border:1px solid rgba(255,255,255,.08); user-select:none; }
-    .dual-track .rail { position:absolute; top:34px; left:14px; right:14px; height:10px; background:#1c2444; border-radius:999px; }
-    .dual-track .ticks { position:absolute; top:28px; left:14px; right:14px; height:22px; display:flex; justify-content:space-between; pointer-events:none; }
-    .dual-track .ticks span { width:2px; height:22px; background:rgba(255,255,255,.12); }
-    .dual-track .rail .fill { position:absolute; top:0; height:10px; background: linear-gradient(90deg, #ffd166, #7aa2ff); border-radius:999px; }
-    .thumb { position:absolute; top:26px; width:24px; height:24px; border-radius:50%; background:#fff; box-shadow:0 2px 10px rgba(0,0,0,.35); cursor:grab; }
-    .thumb:active { cursor:grabbing; }
-    .thumb.start { background:#ffd166; }
-    .thumb.current { background:#7aa2ff; }
-    canvas { width: 100%; height: 260px; background:#0f1328; border-radius: 12px; border:1px solid rgba(255,255,255,.08); }
-    .note { font-size: 13px; color: var(--muted); }
-    .inv-wrap { display:grid; grid-template-columns: 1fr auto; gap: 10px; align-items:center; }
-    .inv-labels { display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-top:4px; }
-    .accum { margin-top: 6px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,.03); border:1px solid rgba(255,255,255,.10); }
-    .accum h3 { margin:0 0 6px; font-size:14px; color:var(--muted); font-weight:700; }
-    .accum .line { display:flex; justify-content:space-between; margin: 4px 0; }
-    .accum .val { font-weight:800; }
-    .accum .fee { color: var(--muted); font-size:13px; margin-top:6px; }
-    .accum .fee .on { color: var(--yellow); font-weight:700; }
-    .accum .fee .off { color: var(--muted); }
-    .accum details { margin-top:8px; }
-    .accum summary { cursor:pointer; color: var(--muted); }
-    .accum .mini { font-size:13px; color: var(--muted); margin-top:6px; }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Revenue Share Calculator</title>
+<style>
+:root{--bg:#0f1220;--panel:#171a2b;--muted:#8a93a6;--text:#e8ecf8;--accent:#7aa2ff;--green:#5fd08b;--yellow:#ffd166;--purple:#b388ff;--track:#0e1325;--red:#ff7a7a;}
+*{box-sizing:border-box}body{margin:0;padding:24px;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:radial-gradient(1200px 800px at 20% -10%,#1d2342 0%,#0f1220 60%);color:var(--text)}
+h1{margin:0 0 8px;font-weight:700;letter-spacing:.2px}.sub{color:var(--muted);margin-bottom:24px}.wrap{display:grid;grid-template-columns:420px 1fr;gap:20px;align-items:stretch}
+.card{background:linear-gradient(180deg,#1a2040,#151a30);border:1px solid rgba(255,255,255,.06);border-radius:16px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.stack{display:flex;flex-direction:column;gap:14px}
+.card:last-of-type .stack:last-child{flex:1;display:flex;flex-direction:column;justify-content:flex-end}
+.flex-between-center{display:flex;justify-content:space-between;align-items:center}
+.row{display:grid;grid-template-columns:1fr 200px;gap:12px;align-items:center}.row label{color:var(--muted);font-size:14px}
+input[type=text]{width:100%;padding:14px;border-radius:12px;background:#0e1325;color:var(--text);border:1px solid rgba(255,255,255,.10);outline:none;font-size:18px;font-weight:600}
+.input-with-arrows{position:relative;display:flex;align-items:center;}
+.input-with-arrows input{padding-right:50px !important;}
+.input-arrows{position:absolute;right:8px;display:flex;flex-direction:column;gap:1px;}
+.input-arrows button{background:#1c2444;border:1px solid rgba(255,255,255,.15);color:var(--text);padding:2px 6px;border-radius:3px;cursor:pointer;font-size:10px;line-height:1;transition:background 0.2s;}
+.input-arrows button:hover:not(:disabled){background:#2a3454;}
+.input-arrows button:disabled{opacity:0.5;cursor:not-allowed;}
+input[type=range]{width:100%;height:10px}.muted{color:var(--muted)}.badge{display:inline-block;padding:6px 12px;border-radius:999px;background:#0e1325;border:1px solid rgba(255,255,255,.10);font-size:13px;color:var(--muted)}
+.bar{display:flex;height:30px;overflow:hidden;border-radius:999px;background:#0e1325;border:1px solid rgba(255,255,255,.08)}.bar .your{background:var(--purple);display:flex;align-items:center;justify-content:center;font-size:13px}
+.bar .client{background:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;flex:1}.grid{width:100%;border-collapse:collapse}.grid th,.grid td{padding:12px;border-bottom:1px solid rgba(255,255,255,.08);font-size:14px}
+.grid th{text-align:left;color:var(--muted);font-weight:700}.grid tr.highlight{background:rgba(122,162,255,.18)}.grid tr:hover{background:rgba(122,162,255,.10);cursor:pointer}
+.dual-track{position:relative;height:76px;padding:22px 14px;background:var(--track);border-radius:14px;border:1px solid rgba(255,255,255,.08);-webkit-user-select:none;-ms-user-select:none;user-select:none}
+.dual-track .rail{position:absolute;top:34px;left:14px;right:14px;height:10px;background:#1c2444;border-radius:999px}.dual-track .ticks{position:absolute;top:28px;left:14px;right:14px;height:22px;display:flex;justify-content:space-between;pointer-events:none}
+.dual-track .ticks span{width:2px;height:22px;background:rgba(255,255,255,.12)}.dual-track .rail .fill{position:absolute;top:0;height:10px;background:linear-gradient(90deg,#ffd166,#7aa2ff);border-radius:999px}
+.thumb{position:absolute;top:26px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 2px 10px rgba(0,0,0,.35);cursor:grab}.thumb:active{cursor:grabbing}.thumb.start{background:#ffd166}.thumb.current{background:#7aa2ff}
+canvas{width:100%;height:260px;background:#0f1328;border-radius:12px;border:1px solid rgba(255,255,255,.08)}.note{font-size:13px;color:var(--muted)}
+.inv-wrap{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center}.inv-labels{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-top:4px}
+.accum{padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.10)}.accum h3{margin:0 0 6px;font-size:14px;color:var(--muted);font-weight:700}
+.accum .line{display:flex;justify-content:space-between;margin:4px 0}.accum .val{font-weight:800}.accum .fee{color:var(--muted);font-size:13px;margin-top:6px}.accum .fee .on{color:var(--yellow);font-weight:700}.accum .fee .off{color:var(--muted)}
+.card:first-child .stack:last-child{flex:1;display:flex;flex-direction:column;justify-content:flex-end;}
+#accumTotals{background:#0f1328;border:1px solid rgba(255,255,255,.08);height:260px;display:flex;flex-direction:column;justify-content:center;padding:24px;flex-shrink:0;}
+#accumTotals .line{display:flex;justify-content:space-between;margin:6px 0;padding:6px 0;border-bottom:0.5px solid rgba(255,255,255,.1);}
+#accumTotals .line:last-child{border-bottom:none;}
+#accumTotals .line:first-of-type{font-weight:700;color:var(--text);}
+#accumTotals .line:first-of-type .val{font-size:16px;}
+#accumTotals .line:nth-of-type(2){font-weight:700;color:var(--green);}
+#accumTotals .line:nth-of-type(2) .val{font-size:16px;}
+#accumTotals .line:last-of-type{font-weight:700;color:var(--purple);border-top:1px solid rgba(255,255,255,.2);padding-top:10px;margin-top:8px;}
+#accumTotals .line:last-of-type .val{font-size:18px;font-weight:900;}
+#accumTotals .line:nth-of-type(3), #accumTotals .line:nth-of-type(4){opacity:0.7;font-weight:400;}
+.accum details{margin-top:8px}.accum summary{cursor:pointer;color:var(--muted)}.accum .mini{font-size:13px;color:var(--muted);margin-top:6px}
+.value-large{font-size:22px;font-weight:800}
+.mt-20{margin-top:20px;}
+.mt-8{margin-top:8px;}
+.range-header{display:flex;align-items:center;gap:4px;}
+.range-arrow{color:var(--muted);font-size:12px;opacity:0.7;}
+.grid th:first-child, .grid td:first-child{border-right:1px solid rgba(255,255,255,.15);}
+.grid th:nth-child(2), .grid td:nth-child(2){border-left:1px solid rgba(255,255,255,.15);}
+</style>
 </head>
 <body>
-  <h1 style="margin-bottom: 20px">Tiered Revshare Calculator</h1>
-  <!--
-  <div class="sub">T defines the <em>first step</em>. If inventory exposure is <strong>&lt;25%</strong>, the calculator uses a flat <strong>50%</strong> share (per band) and adds an <strong>annual license fee</strong> of <strong>25% of T</strong> (waived at <strong>25%+</strong>).</div>
-  -->
-  <div class="wrap">
-    <!-- LEFT: Inputs -->
-    <div class="card stack">
-      <div class="row">
-        <label for="target">First Tier</label>
+<h1>Tiered Revenue Share Calculator</h1>
+<div class="sub"></div>
+<div class="wrap">
+  <div class="card stack">
+    <div class="row">
+      <label for="target">First Tier</label>
+      <div class="input-with-arrows">
         <input id="target" type="text" value="$200,000">
-      </div>
-
-      <!-- Inventory slider 0–100 in 25% jumps -->
-      <div class="stack">
-        <div class="inv-wrap">
-          <label for="invSlider" id="invLabel">Inventory Exposure</label>
-          <div class="badge"><span id="invDisplay">25</span>%</div>
+        <div class="input-arrows">
+          <button id="targetUp">▲</button>
+          <button id="targetDown">▼</button>
         </div>
-        <input id="invSlider" type="range" min="0" max="100" step="25" value="25">
-        <div class="inv-labels"><span>0%</span><span>25%</span><span>50%</span><span>75%</span><span>100%</span></div>
       </div>
-
-      <div class="note" id="noticeBox"></div>
-
-      <!-- Accumulated Totals -->
+    </div>
+    <div class="stack">
+      <div class="inv-wrap">
+        <label for="invSlider" id="invLabel">Inventory Exposure</label>
+        <div class="badge"><span id="invDisplay">20</span>%</div>
+      </div>
+      <input id="invSlider" type="range" min="0" max="80" step="20" value="20">
+            <div class="fee"><span id="licenseBadge" class="off">✅ License fee is waived</span></div>
+      <div class="inv-labels"><span>0%</span><span>20%</span><span>40%</span><span>60%</span><span>80%</span></div>
+    </div>
+    <div class="stack">
+      <div class="muted">Revenue Share Breakdown</div>
       <div class="accum" id="accumTotals">
-        <h3>Accumulated totals (to selected band)</h3>
-        <div class="line"><span>Gross</span><span class="val" id="accGross">$0</span></div>
-        <div class="line"><span>Your revshare total</span><span class="val" id="accYourRev">$0</span></div>
-        <div class="line"><span>License (annual)</span><span class="val" id="accLicense">$0</span></div>
-        <div class="line"><span>Your total incl. license</span><span class="val" id="accYourTotal">$0</span></div>
-        <div class="line"><span>Client total</span><span class="val" id="accClient">$0</span></div>
-        <div class="line"><span>Your effective % (revshare)</span><span class="val" id="accEff">0%</span></div>
-        <div class="fee">License status: <span id="licenseBadge" class="off">(waived ≥25%)</span></div>
-        <details id="accDetails">
-          <summary>Per-band details</summary>
-          <div id="accList" class="mini"></div>
-        </details>
-      </div>
-    </div>
-
-    <!-- RIGHT: Results -->
-    <div class="card stack">
-      <!-- Step Explorer -->
-      <div class="stack">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
-          <div class="muted">Step Explorer (per-step, step-locked)</div>
-          <div class="badge">Revenue per Step: <span id="bandWidth">$0</span></div>
-        </div>
-        <div class="dual-track" id="dualTrack">
-          <div class="rail" id="rail"><div class="fill" id="fill"></div></div>
-          <div class="ticks" id="ticks"></div>
-          <div class="thumb start" id="thumbStart" title="Band Start"></div>
-          <div class="thumb current" id="thumbCurrent" title="Band End"></div>
-        </div>
-        <div style="display:flex; justify-content:space-between; font-size:13px;" class="muted">
-          <div>Selected band: <span id="stepLabel">0</span> (rate: <span id="stepRate">0%</span>)</div>
-          <div>Range: <span id="stepRange">$0 – $0</span></div>
-        </div>
-      </div>
-
-      <div class="row" style="margin-top:8px;">
-        <div>
-          <div class="muted">Your Share (This Band)</div>
-          <div id="yourValue" style="font-size:22px; font-weight:800;">$0</div>
-        </div>
-        <div>
-          <div class="muted">Client Share (This Band)</div>
-          <div id="clientValue" style="font-size:22px; font-weight:800;">$0</div>
-        </div>
-      </div>
-      <div class="bar">
-        <div id="yourBar" class="your" style="width:0%;">Your 0%</div>
-        <div id="clientBar" class="client">Client 100%</div>
-      </div>
-
-      <!-- Discount Chart -->
-      <div class="stack">
-        <div class="muted">Per-step discount from 50% (current inventory)</div>
-        <canvas id="discountChart" width="900" height="260"></canvas>
+        <div class="line"><span>Gross Revenue</span><span class="val" id="accGross">$0</span></div>
+      <div class="line"><span>Client Portion</span><span class="val" id="accClient">$0</span></div>
+      <div class="line"><span>Fareplace Portion</span><span class="val" id="accYourRev">$0</span></div>
+      <div class="line" id="licenseLine"><span>License (Annual)</span><span class="val" id="accLicense">$0</span></div>
+      <div class="muted" id="licenseNote" style="display:none; font-size:11px; color:var(--yellow); margin:2px 0 4px 0; padding-left:4px;">⚠️ Inventory exposure below 20%</div>
+        <div class="line"><span>Fareplace Total, incl. license</span><span class="val" id="accYourTotal">$0</span></div>
+        <!-- <div class="line"><span>Your effective % (revshare)</span><span class="val" id="accEff">0%</span></div> -->
       </div>
     </div>
   </div>
-
-  <!-- LOOKUP TABLE -->
-  <div class="card" style="margin-top:20px;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-      <div class="muted">Revenue Share model based on revenue and exposed inventory (seats) %</div>
-      <div id="tableModeBadge" class="badge">Static scenarios by exposure (0/25/50/75/100). 0% is always 50%.</div>
+  
+  <div class="card stack">
+    <div class="flex-between-center">
+      <div class="muted">Tier Explorer (per-tier simulation)</div>
     </div>
-    <table class="grid" id="lookup">
-      <thead>
-        <tr id="tableHeadRow">
-          <th>Revenue Before Sharing</th>
-          <th>0%</th><th>25%</th><th>50%</th><th>75%</th><th>100%</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+    
+    <div class="dual-track" id="dualTrack">
+      <div class="rail" id="rail"><div class="fill" id="fill"></div></div>
+      <div class="ticks" id="ticks"></div>
+      <div class="thumb start" id="thumbStart" title="Band Start"></div>
+      <div class="thumb current" id="thumbCurrent" title="Band End"></div>
+    </div>
+    
+    <div class="muted">
+      <div>Selected band: <span id="stepLabel">0</span> (rate: <span id="stepRate">0%</span>)</div>
+      <div>Range: <span id="stepRange">$0 – $0</span></div>
+    </div>
+    
+    <div class="row">
+      <div><div class="muted">Fareplace Share</div><div id="yourValue" class="value-large">$0</div></div>
+      <div><div class="muted">Client Share</div><div id="clientValue" class="value-large">$0</div></div>
+    </div>
+    
+    <div class="bar"><div id="yourBar" class="your">Fareplace 0%</div><div id="clientBar" class="client">Client 100%</div></div>
+    
+    <div class="stack">
+      <div class="muted" id="discountChartLabel">Per-step discount from 45% (current inventory)</div>
+      <canvas id="discountChart" width="900" height="260"></canvas>
+    </div>
   </div>
-
-  <script>
-    // ===== CONFIG =====
-    const CONFIG = {
-      BANDS: 5,
-      MIN_INVENTORY_PCT: 25,
-      MAX_INVENTORY_PCT: 100,
-      BASE_MAX_SHARE_PCT: 50,
-      PER_STEP_BASE: 1,
-      BAND_ACCEL: 1.4,
-      INV_ACCEL: 1.4,
-      INVENTORY_DENOM: 100,
-      UI_MAX_STEPS: 5,
-      GLOBAL_CAP: 60,
-      ALPHA_INV: 1.4,
-      BETA_STEP: 1.6,
-      K_MIN: 0.8,
-      K_MAX: 1.8,
-      STEP_MULT_EXP: 1.4,
-      BALANCE: 0.50,
-      INV_STRENGTH: 1.00,
-      STEP_STRENGTH: 1.00,
-      LICENSE_FEE_PCT_OF_T: 25
-    };
-
-    const clamp = (v, lo, hi) => Math.min(Math.max(v, lo), hi);
-
-    function weights(cfg=CONFIG){
-      let wStep = cfg.BALANCE * cfg.STEP_STRENGTH;
-      let wInv  = (1 - cfg.BALANCE) * cfg.INV_STRENGTH;
-      const sum = (wStep + wInv) || 1;
-      return { wStep: wStep/sum, wInv: wInv/sum };
-    }
-
-    // Core math
-    function totalStepReduction(step, icp, cfg = CONFIG) {
-      const invScale = clamp((icp - cfg.MIN_INVENTORY_PCT) / (cfg.MAX_INVENTORY_PCT - cfg.MIN_INVENTORY_PCT), 0, 1);
-      const bandTerm = (cfg.PER_STEP_BASE * (1 + cfg.BAND_ACCEL * Math.max(step - 1, 0))) * weights(cfg).wStep;
-      const invTerm  = (1 + cfg.INV_ACCEL * invScale * cfg.INV_STRENGTH);
-      return step * bandTerm * invTerm;
-    }
-
-    function shapeDiscount(rawDiscount, step, icp, cfg=CONFIG){
-      const sClamped = clamp(step, 0, cfg.BANDS-1);
-      const fStep = Math.pow(sClamped / (cfg.BANDS-1), cfg.BETA_STEP) * weights(cfg).wStep;
-      // FIX: correct denominator (bug caused NaN at 0% exposure)
-      const invNormDen = (cfg.MAX_INVENTORY_PCT - cfg.MIN_INVENTORY_PCT);
-      const invNorm = invNormDen > 0 ? (icp - cfg.MIN_INVENTORY_PCT) / invNormDen : 0;
-      const fInv  = Math.pow(clamp(invNorm,0,1), cfg.ALPHA_INV) * weights(cfg).wInv;
-      const mix = clamp(fInv + fStep, 0, 1);
-      let desiredCap = cfg.GLOBAL_CAP * clamp(0.15 + 0.85 * mix, 0, 1);
-      let k = cfg.K_MIN + (cfg.K_MAX - cfg.K_MIN) * mix;
-      const x = clamp(rawDiscount, 0, desiredCap);
-      const y = desiredCap * (1 - Math.exp(-k * (x / desiredCap)));
-      return clamp(y, 0, desiredCap);
-    }
-
-    function bandPercent(step, icp, cfg = CONFIG) {
-      if (icp === 0) return cfg.BASE_MAX_SHARE_PCT; // 0% table column: always 50%
-      if (icp < cfg.MIN_INVENTORY_PCT) return cfg.BASE_MAX_SHARE_PCT; // calculator rule (<25%)
-      if (step === 0 && icp <= 25) return cfg.BASE_MAX_SHARE_PCT;
-
-      const pre = Math.max(0, cfg.BASE_MAX_SHARE_PCT - totalStepReduction(step, icp, cfg));
-      const {wStep, wInv} = weights(cfg);
-      const stepFactor = Math.pow(clamp(step,0,cfg.BANDS-1) / (cfg.BANDS-1), cfg.STEP_MULT_EXP) * wStep;
-      const invFactorNormDen = (cfg.MAX_INVENTORY_PCT - cfg.MIN_INVENTORY_PCT);
-      const invFactorNorm = invFactorNormDen > 0 ? (icp - cfg.MIN_INVENTORY_PCT) / invFactorNormDen : 0;
-      const invFactor  = Math.pow(clamp(invFactorNorm,0,1), cfg.ALPHA_INV) * wInv;
-      const base = 0.6;
-      const multStrength = base + 0.4 * clamp(stepFactor + invFactor, 0, 1);
-      const multiplier = Math.max(0, 1 - (icp / cfg.INVENTORY_DENOM) * multStrength);
-      const rawPlatform = Math.max(0, pre * multiplier);
-      const rawDiscount = cfg.BASE_MAX_SHARE_PCT - rawPlatform;
-      const adjDiscount = shapeDiscount(rawDiscount, step, icp, cfg);
-      const platform = clamp(cfg.BASE_MAX_SHARE_PCT - adjDiscount, 0.5, cfg.BASE_MAX_SHARE_PCT);
-      return platform;
-    }
-
-    // UI helpers
-    function fmt(n){ return '$' + Math.round(n).toLocaleString(); }
-    function humanShort(n){
-      if (n >= 1e9) return (n/1e9).toFixed(n%1e9===0?0:1) + 'B';
-      if (n >= 1e6) return (n/1e6).toFixed(n%1e6===0?0:1) + 'M';
-      if (n >= 1e3) return (n/1e3).toFixed(n%1e3===0?0:1) + 'K';
-      return String(n);
-    }
-    function bandLabel(step, T) {
-      if (step === 0) return `≤ $${T.toLocaleString()}`;
-      const lo = step * T + 1;
-      const hi = (step + 1) * T;
-      return `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;
-    }
-
-    // ===== UI State =====
-    let state = { T: 200000, inv: 25, band: 0 };
-    let chartBarRects = [];
-
-    function positionHandles(){
-      const startThumb = document.getElementById('thumbStart');
-      const endThumb  = document.getElementById('thumbCurrent');
-      const fill = document.getElementById('fill');
-
-      const rail = document.getElementById('rail');
-      const rect = rail.getBoundingClientRect();
-      const w = rect.width;
-      const toPx = (b)=> (b / CONFIG.UI_MAX_STEPS) * w;
-
-      const startPx = toPx(state.band);
-      const endPx   = toPx(state.band + 1);
-
-      startThumb.style.left = (14 + startPx - 12) + 'px';
-      endThumb.style.left   = (14 + endPx   - 12) + 'px';
-      fill.style.left = (14 + startPx) + 'px';
-      fill.style.width = Math.max(0, endPx - startPx) + 'px';
-
-      const pct = Math.round(bandPercent(state.band, state.inv)) + '%';
-      document.getElementById('stepLabel').textContent = state.band;
-      document.getElementById('stepRate').textContent = pct;
-      const startAmt = state.band * state.T;
-      const endAmt = (state.band + 1) * state.T;
-      document.getElementById('stepRange').textContent = `${fmt(startAmt)} – ${fmt(endAmt)}`;
-      document.getElementById('bandWidth').textContent = fmt(state.T);
-    }
-
-    function enableDragging(){
-      const rail = document.getElementById('rail');
-      const startThumb = document.getElementById('thumbStart');
-      const endThumb  = document.getElementById('thumbCurrent');
-
-      const onMoveStart = (e) => {
-        const rect = rail.getBoundingClientRect();
-        const px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-        const w = rect.width;
-        const b = Math.min(Math.max(Math.round((px / w) * CONFIG.UI_MAX_STEPS),0), CONFIG.UI_MAX_STEPS-1);
-        state.band = b; update();
-      };
-      const onMoveEnd = (e) => {
-        const rect = rail.getBoundingClientRect();
-        const px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-        const w = rect.width;
-        let k = Math.round((px / w) * CONFIG.UI_MAX_STEPS);
-        if (k < 1) k = 1;
-        if (k > CONFIG.UI_MAX_STEPS) k = CONFIG.UI_MAX_STEPS;
-        state.band = Math.min(Math.max(k - 1,0), CONFIG.UI_MAX_STEPS-1);
-        update();
-      };
-
-      function drag(el, handler){
-        let dragging=false;
-        const down = (e)=>{ dragging=true; e.preventDefault(); };
-        const up   = ()=>{ dragging=false; };
-        const move = (e)=>{ if(!dragging) return; handler(e); };
-        el.addEventListener('mousedown', down); window.addEventListener('mouseup', up); window.addEventListener('mousemove', move);
-        el.addEventListener('touchstart', down, {passive:false}); window.addEventListener('touchend', up); window.addEventListener('touchmove', move, {passive:false});
-      }
-      drag(startThumb, onMoveStart);
-      drag(endThumb, onMoveEnd);
-      rail.addEventListener('click', (e)=>{
-        const rect = rail.getBoundingClientRect();
-        const px = e.clientX - rect.left;
-        const w = rect.width;
-        let k = Math.round((px / w) * CONFIG.UI_MAX_STEPS);
-        if (k === 0) state.band = 0;
-        else state.band = Math.min(Math.max(k - 1,0), CONFIG.UI_MAX_STEPS-1);
-        update();
-      });
-    }
-
-    function drawDiscountChart(){
-      const canvas = document.getElementById('discountChart');
-      const ctx = canvas.getContext('2d');
-      canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight;
-      const w = canvas.width, H = canvas.clientHeight;
-      const pad = 46, cw = w - pad*2, ch = H - pad*2;
-
-      const steps = Array.from({length: CONFIG.BANDS}, (_,i)=>i);
-      const discounts = steps.map(s => CONFIG.BASE_MAX_SHARE_PCT - bandPercent(s, state.inv));
-      const maxDisc = Math.max(10, ...discounts);
-      chartBarRects = [];
-
-      ctx.clearRect(0,0,w,H);
-      ctx.strokeStyle = 'rgba(255,255,255,.15)'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(pad,pad); ctx.lineTo(pad,H-pad); ctx.lineTo(w-pad,H-pad); ctx.stroke();
-
-      const barW = cw / steps.length * 0.7;
-      steps.forEach((s,i)=>{
-        const x = pad + (i + 0.15) * (cw / steps.length);
-        const val = discounts[i];
-        const bh = (val / maxDisc) * ch;
-        ctx.fillStyle = '#ffd166';
-        ctx.fillRect(x, H - pad - bh, barW, bh);
-        chartBarRects.push({x, y:H - pad - bh, w:barW, h:bh, step:s});
-
-        const endRevenue = (s + 1) * state.T;
-        const lbl = humanShort(endRevenue);
-        ctx.fillStyle = '#cbd2e9'; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
-        ctx.fillText(lbl, x + barW/2, H - pad + 16);
-
-        if (s === state.band){
-          ctx.strokeStyle = '#7aa2ff'; ctx.lineWidth = 2;
-          ctx.strokeRect(x-2, H - pad - bh - 2, barW+4, bh+4);
-        }
-      });
-
-      ctx.fillStyle = '#9aa3bd'; ctx.font = '12px sans-serif'; ctx.textAlign = 'right';
-      for (let i=0;i<=4;i++){
-        const y = H - pad - (i/4)*ch;
-        const v = (i/4)*maxDisc;
-        ctx.fillText(`${Math.round(v)}%`, pad - 8, y + 4);
-      }
-      ctx.fillStyle = '#9aa3bd'; ctx.textAlign = 'left'; ctx.fillText('Discount (%) from 50%', pad, pad - 12);
-
-      canvas.onclick = (evt)=>{
-        const rect = canvas.getBoundingClientRect();
-        const cx = evt.clientX - rect.left;
-        const cy = evt.clientY - rect.top;
-        for (let i=0;i<chartBarRects.length;i++){
-          const r = chartBarRects[i];
-          if (cx >= r.x && cx <= r.x + r.w && cy >= r.y && cy <= r.y + r.h){
-            state.band = r.step;
-            update();
-            const tr = document.querySelector(`tr[data-step="${r.step}"]`);
-            if (tr) tr.scrollIntoView({behavior:'smooth', block:'nearest'});
-            break;
-          }
-        }
-      };
-    }
-
-    function updateTable(){
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
-
-      const exposures = [0, 25, 50, 75, 100];
-      for (let s = 0; s < CONFIG.BANDS; s++){
-        const row = document.createElement('tr');
-        row.dataset.step = String(s);
-        if (s === state.band) row.className = 'highlight';
-
-        const bandCell = document.createElement('td');
-        bandCell.textContent = bandLabel(s, state.T);
-        row.appendChild(bandCell);
-
-        exposures.forEach((icp) => {
-          const cell = document.createElement('td');
-          // 0% column is hard-coded 50%; the rest use the model at their static exposure, independent of slider
-          const pct = (icp === 0) ? 50 : Math.round(bandPercent(s, icp));
-          cell.textContent = pct + '%';
-          row.appendChild(cell);
-        });
-
-        row.addEventListener('click', () => { state.band = s; update(); });
-        tbody.appendChild(row);
-      }
-    }
-
-    function updateNumbers(){
-      const pctInt = Math.round(bandPercent(state.band, state.inv));
-      const your = state.T * (pctInt / 100);
-      const client = state.T - your;
-      document.getElementById('yourValue').textContent = fmt(your);
-      document.getElementById('clientValue').textContent = fmt(client);
-      document.getElementById('yourBar').style.width = `${pctInt}%`;
-      document.getElementById('yourBar').textContent = `Your ${pctInt}%`;
-      document.getElementById('clientBar').textContent = `Client ${Math.max(0,100-pctInt)}%`;
-    }
-
-    function updateAccumTotals(){
-      const accList = document.getElementById('accList');
-      accList.innerHTML = '';
-      const bandsCount = state.band + 1;
-      const gross = bandsCount * state.T;
-      let platform = 0, client = 0;
-      for (let s = 0; s <= state.band; s++){
-        const pct = Math.round(bandPercent(s, state.inv));
-        const your = state.T * (pct / 100);
-        const their = state.T - your;
-        platform += your; client += their;
-        const lbl = (s === 0) ? `≤ ${fmt(state.T)}` : `${fmt(s*state.T + 1)} – ${fmt((s+1)*state.T)}`;
-        const line = document.createElement('div');
-        line.textContent = `Band ${s}: ${lbl} → Your ${pct}% = ${fmt(your)} | Client = ${fmt(their)}`;
-        accList.appendChild(line);
-      }
-
-      // Annual license: ALWAYS displayed; applied (<25%), waived (>=25%)
-      const license = (state.inv < CONFIG.MIN_INVENTORY_PCT)
-        ? Math.round(state.T * (CONFIG.LICENSE_FEE_PCT_OF_T/100))
-        : 0;
-      const licenseBadge = document.getElementById('licenseBadge');
-      licenseBadge.textContent = (state.inv < CONFIG.MIN_INVENTORY_PCT) ? '(applied <25%)' : '(waived ≥25%)';
-      licenseBadge.className = (state.inv < CONFIG.MIN_INVENTORY_PCT) ? 'on' : 'off';
-
-      const yourTotalInclLicense = platform + license;
-
-      // Effective % excludes license
-      const effPct = gross > 0 ? Math.round((platform / gross) * 100) : 0;
-
-      document.getElementById('accGross').textContent       = fmt(gross);
-      document.getElementById('accYourRev').textContent     = fmt(platform);
-      document.getElementById('accLicense').textContent     = fmt(license);
-      document.getElementById('accYourTotal').textContent   = fmt(yourTotalInclLicense);
-      document.getElementById('accClient').textContent      = fmt(client);
-      document.getElementById('accEff').textContent         = `${effPct}%`;
-    }
-
-    function update(){
-      // Slider already snaps at 25% steps via HTML 'step' attr
-      state.inv = parseInt(document.getElementById('invSlider').value, 10) || 0;
-      document.getElementById('invDisplay').textContent = state.inv;
-      document.getElementById('bandWidth').textContent = fmt(state.T);
-      document.getElementById('noticeBox').innerHTML =
-        (state.inv < 25)
-          ? `<span class="badge" style="background:rgba(255,209,102,.12); border-color:rgba(255,209,102,.35)">Flat 50% per band + annual license applies (&lt;25%).</span>`
-          : `<span class="badge">Standard tiered model. Annual license is waived (=$0).</span>`;
-
-      positionHandles();
-      updateNumbers();
-      updateTable();
-      drawDiscountChart();
-      updateAccumTotals();
-    }
-
-    function onTargetFocus(){ const el = document.getElementById('target'); el.value = (el.value||'').replace(/[^\d]/g,''); }
-    function onTargetChangeManual(){ const t = document.getElementById('target'); const raw = (t.value||'').replace(/[^\d]/g,''); state.T = raw? parseInt(raw,10):0; t.value = '$' + state.T.toLocaleString(); update(); }
-
-    // Init
-    window.addEventListener('DOMContentLoaded', () => {
-      const t = document.getElementById('target');
-      t.addEventListener('focus', onTargetFocus);
-      t.addEventListener('blur', onTargetChangeManual);
-      t.addEventListener('keydown', (e)=>{ if (e.key === 'Enter') { onTargetChangeManual(); t.blur(); } });
-      t.value = '$' + state.T.toLocaleString();
-      document.getElementById('invSlider').addEventListener('input', update);
-
-      // Build ticks
-      const ticks = document.getElementById('ticks');
-      for (let i = 0; i <= CONFIG.UI_MAX_STEPS; i++){
-        const span = document.createElement('span'); ticks.appendChild(span);
-      }
-
-      update();
-      setTimeout(()=>{
-        // Enable dragging for band selector
-        const rail = document.getElementById('rail');
-        const startThumb = document.getElementById('thumbStart');
-        const endThumb  = document.getElementById('thumbCurrent');
-
-        const onMoveStart = (e) => {
-          const rect = rail.getBoundingClientRect();
-          const px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-          const w = rect.width;
-          const b = Math.min(Math.max(Math.round((px / w) * CONFIG.UI_MAX_STEPS),0), CONFIG.UI_MAX_STEPS-1);
-          state.band = b; update();
-        };
-        const onMoveEnd = (e) => {
-          const rect = rail.getBoundingClientRect();
-          const px = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
-          const w = rect.width;
-          let k = Math.round((px / w) * CONFIG.UI_MAX_STEPS);
-          if (k < 1) k = 1;
-          if (k > CONFIG.UI_MAX_STEPS) k = CONFIG.UI_MAX_STEPS;
-          state.band = Math.min(Math.max(k - 1,0), CONFIG.UI_MAX_STEPS-1); update();
-        };
-        function drag(el, handler){
-          let dragging=false;
-          const down = (e)=>{ dragging=true; e.preventDefault(); };
-          const up   = ()=>{ dragging=false; };
-          const move = (e)=>{ if(!dragging) return; handler(e); };
-          el.addEventListener('mousedown', down); window.addEventListener('mouseup', up); window.addEventListener('mousemove', move);
-          el.addEventListener('touchstart', down, {passive:false}); window.addEventListener('touchend', up); window.addEventListener('touchmove', move, {passive:false});
-        }
-        drag(startThumb, onMoveStart);
-        drag(endThumb, onMoveEnd);
-        rail.addEventListener('click', (e)=>{
-          const rect = rail.getBoundingClientRect();
-          const px = e.clientX - rect.left;
-          const w = rect.width;
-          let k = Math.round((px / w) * CONFIG.UI_MAX_STEPS);
-          if (k === 0) state.band = 0;
-          else state.band = Math.min(Math.max(k - 1,0), CONFIG.UI_MAX_STEPS-1);
-          update();
-        });
-      }, 0);
-    });
-    window.addEventListener('resize', () => { update(); });
-  </script>
+</div>
+<div class="card mt-20">
+  <!-- <div class="muted">Revenue Share model based on revenue and exposed inventory (seats) %</div> -->
+  <!-- <div id="tableModeBadge" class="badge">Inventory exposure ranges: 0→19%, 20→39%, 40→59%, 60→79%, 80%. 0% is always 50%.</div> -->
+  <table class="grid" id="lookup">
+    <thead>
+      <tr>
+        <th style="text-align:left; border-bottom: 1px solid rgba(255,255,255,.15); padding-bottom:8px; color:var(--muted); font-size:13px;">Tiers</th>
+        <th colspan="5" style="text-align:left; border-bottom: 1px solid rgba(255,255,255,.15); padding-bottom:8px; color:var(--muted); font-size:13px;">Inventory Exposure Range (% of Total Seats)</th>
+      </tr>
+      <tr id="tableHeadRow">
+        <th>Gross Revenue</th>
+        <th><span class="range-header">0% <span class="range-arrow">→ 19%</span></span></th>
+        <th><span class="range-header">20% <span class="range-arrow">→ 39%</span></span></th>
+        <th><span class="range-header">40% <span class="range-arrow">→ 59%</span></span></th>
+        <th><span class="range-header">60% <span class="range-arrow">→ 79%</span></span></th>
+        <th><span class="range-header">80%</span></th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+<script>
+const CONFIG={
+  BANDS:5,
+  MIN_INVENTORY_PCT:20,
+  MAX_INVENTORY_PCT:80,
+  BASE_MAX_SHARE_PCT:45,
+  PER_STEP_BASE:10,
+  BAND_ACCEL:1,
+  INV_ACCEL:1,
+  INVENTORY_DENOM:50,
+  UI_MAX_STEPS:5,
+  GLOBAL_CAP:70,
+  ALPHA_INV:1,
+  BETA_STEP:0.2,
+  K_MIN:0.6,
+  K_MAX:0.9,
+  STEP_MULT_EXP:1,
+  BALANCE:0.4,
+  INV_STRENGTH:1.00,
+  STEP_STRENGTH:1.00,
+  LICENSE_FEE_PCT_OF_T:30
+};
+const clamp=(v,lo,hi)=>Math.min(Math.max(v,lo),hi);
+function weights(cfg=CONFIG){let wStep=cfg.BALANCE*cfg.STEP_STRENGTH;let wInv=(1-cfg.BALANCE)*cfg.INV_STRENGTH;const sum=(wStep+wInv)||1;return{wStep:wStep/sum,wInv:wInv/sum};}
+function totalStepReduction(step,icp,cfg=CONFIG){const invScale=clamp((icp-cfg.MIN_INVENTORY_PCT)/(cfg.MAX_INVENTORY_PCT-cfg.MIN_INVENTORY_PCT),0,1);const bandTerm=(cfg.PER_STEP_BASE*(1+cfg.BAND_ACCEL*Math.max(step-1,0)))*weights(cfg).wStep;const invTerm=(1+cfg.INV_ACCEL*invScale*cfg.INV_STRENGTH);return step*bandTerm*invTerm;}
+function shapeDiscount(rawDiscount,step,icp,cfg=CONFIG){const sClamped=clamp(step,0,cfg.BANDS-1);const fStep=Math.pow(sClamped/(cfg.BANDS-1),cfg.BETA_STEP)*weights(cfg).wStep;const invNormDen=(cfg.MAX_INVENTORY_PCT-cfg.MIN_INVENTORY_PCT);const invNorm=invNormDen>0?(icp-cfg.MIN_INVENTORY_PCT)/invNormDen:0;const fInv=Math.pow(clamp(invNorm,0,1),cfg.ALPHA_INV)*weights(cfg).wInv;const mix=clamp(fInv+fStep,0,1);let desiredCap=cfg.GLOBAL_CAP*clamp(0.15+0.85*mix,0,1);let k=cfg.K_MIN+(cfg.K_MAX-cfg.K_MIN)*mix;const x=clamp(rawDiscount,0,desiredCap);const y=desiredCap*(1-Math.exp(-k*(x/desiredCap)));return clamp(y,0,desiredCap);}
+function bandPercent(step,icp,cfg=CONFIG){if(icp===0)return cfg.BASE_MAX_SHARE_PCT;if(icp<cfg.MIN_INVENTORY_PCT)return cfg.BASE_MAX_SHARE_PCT;if(step===0&&icp<=20)return cfg.BASE_MAX_SHARE_PCT;const pre=Math.max(0,cfg.BASE_MAX_SHARE_PCT-totalStepReduction(step,icp,cfg));const {wStep,wInv}=weights(cfg);const stepFactor=Math.pow(clamp(step,0,cfg.BANDS-1)/(cfg.BANDS-1),cfg.STEP_MULT_EXP)*wStep;const invFactorNormDen=(cfg.MAX_INVENTORY_PCT-cfg.MIN_INVENTORY_PCT);const invFactorNorm=invFactorNormDen>0?(icp-cfg.MIN_INVENTORY_PCT)/invFactorNormDen:0;const invFactor=Math.pow(clamp(invFactorNorm,0,1),cfg.ALPHA_INV)*wInv;const base=.6;const multStrength=base+0.4*clamp(stepFactor+invFactor,0,1);const multiplier=Math.max(0,1-(icp/cfg.INVENTORY_DENOM)*multStrength);const rawPlatform=Math.max(0,pre*multiplier);const rawDiscount=cfg.BASE_MAX_SHARE_PCT-rawPlatform;const adjDiscount=shapeDiscount(rawDiscount,step,icp,cfg);const platform=clamp(cfg.BASE_MAX_SHARE_PCT-adjDiscount,.5,cfg.BASE_MAX_SHARE_PCT);return platform;}
+function fmt(n){return'$'+Math.round(n).toLocaleString();}
+function bandLabel(step,T){if(step===0)return `≤ $${T.toLocaleString()}`;const lo=step*T+1;const hi=(step+1)*T;return `$${lo.toLocaleString()} – $${hi.toLocaleString()}`;}
+let state={T:200000,inv:20,band:0};let chartBarRects=[];
+function positionHandles(){const startThumb=document.getElementById('thumbStart');const endThumb=document.getElementById('thumbCurrent');const fill=document.getElementById('fill');const rail=document.getElementById('rail');const rect=rail.getBoundingClientRect();const w=rect.width;const toPx=(b)=>(b/CONFIG.UI_MAX_STEPS)*w;const startPx=toPx(state.band);const endPx=toPx(state.band+1);startThumb.style.left=(14+startPx-12)+'px';endThumb.style.left=(14+endPx-12)+'px';fill.style.left=(14+startPx)+'px';fill.style.width=Math.max(0,endPx-startPx)+'px';const pct=Math.round(bandPercent(state.band,state.inv))+'%';document.getElementById('stepLabel').textContent=state.band;document.getElementById('stepRate').textContent=pct;const startAmt=state.band*state.T;const endAmt=(state.band+1)*state.T;document.getElementById('stepRange').textContent=`${fmt(startAmt)} – ${fmt(endAmt)}`;}
+function enableDragging(){const rail=document.getElementById('rail');const startThumb=document.getElementById('thumbStart');const endThumb=document.getElementById('thumbCurrent');const onMoveStart=(e)=>{const rect=rail.getBoundingClientRect();const px=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;const w=rect.width;const b=Math.min(Math.max(Math.round((px/w)*CONFIG.UI_MAX_STEPS),0),CONFIG.UI_MAX_STEPS-1);state.band=b;update();};const onMoveEnd=(e)=>{const rect=rail.getBoundingClientRect();const px=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;const w=rect.width;let k=Math.round((px/w)*CONFIG.UI_MAX_STEPS);if(k<1)k=1;if(k>CONFIG.UI_MAX_STEPS)k=CONFIG.UI_MAX_STEPS;state.band=Math.min(Math.max(k-1,0),CONFIG.UI_MAX_STEPS-1);update();};function drag(el,handler){let dragging=false;const down=(e)=>{dragging=true;e.preventDefault();};const up=()=>{dragging=false;};const move=(e)=>{if(!dragging)return;handler(e);};el.addEventListener('mousedown',down);window.addEventListener('mouseup',up);window.addEventListener('mousemove',move);el.addEventListener('touchstart',down,{passive:false});window.addEventListener('touchend',up);window.addEventListener('touchmove',move,{passive:false});}
+drag(startThumb,onMoveStart);drag(endThumb,onMoveEnd);rail.addEventListener('click',(e)=>{const rect=rail.getBoundingClientRect();const px=e.clientX-rect.left;const w=rect.width;let k=Math.round((px/w)*CONFIG.UI_MAX_STEPS);if(k===0)state.band=0;else state.band=Math.min(Math.max(k-1,0),CONFIG.UI_MAX_STEPS-1);update();});}
+function drawDiscountChart(){const canvas=document.getElementById('discountChart');const ctx=canvas.getContext('2d');canvas.width=canvas.clientWidth;canvas.height=canvas.clientHeight;const w=canvas.width,H=canvas.clientHeight;const pad=46,cw=w-pad*2,ch=H-pad*2;const steps=Array.from({length:CONFIG.BANDS},(_,i)=>i);const discounts=steps.map(s=>CONFIG.BASE_MAX_SHARE_PCT-bandPercent(s,state.inv));const maxDisc=Math.max(10,...discounts);chartBarRects=[];ctx.clearRect(0,0,w,H);ctx.strokeStyle='rgba(255,255,255,.15)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad,pad);ctx.lineTo(pad,H-pad);ctx.lineTo(w-pad,H-pad);ctx.stroke();const barW=cw/steps.length*0.7;steps.forEach((s,i)=>{const x=pad+(i+0.15)*(cw/steps.length);const val=discounts[i];const bh=(val/maxDisc)*ch;ctx.fillStyle='#ffd166';ctx.fillRect(x,H-pad-bh,barW,bh);chartBarRects.push({x,y:H-pad-bh,w:barW,h:bh,step:s});const endRevenue=(s+1)*state.T;const lbl=(endRevenue>=1e6)?(endRevenue/1e6)+'M':'$'+(endRevenue.toLocaleString());ctx.fillStyle='#cbd2e9';ctx.font='12px sans-serif';ctx.textAlign='center';ctx.fillText(lbl,x+barW/2,H-pad+16);if(s===state.band){ctx.strokeStyle='#7aa2ff';ctx.lineWidth=2;ctx.strokeRect(x-2,H-pad-bh-2,barW+4,bh+4);}});ctx.fillStyle='#9aa3bd';ctx.font='12px sans-serif';ctx.textAlign='right';for(let i=0;i<=4;i++){const y=H-pad-(i/4)*ch;const v=(i/4)*maxDisc;ctx.fillText(`${Math.round(v)}%`,pad-8,y+4);}ctx.fillStyle='#9aa3bd';ctx.textAlign='left';ctx.fillText(`Discount (%) from ${CONFIG.BASE_MAX_SHARE_PCT}%`,pad,pad-12);if(state.inv<CONFIG.MIN_INVENTORY_PCT){ctx.fillStyle='rgba(0,0,0,0.7)';ctx.fillRect(0,0,w,H);ctx.fillStyle='#ffffff';ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.fillText('Flat 50% Rate for All Tiers',w/2,H/2-10);ctx.font='14px sans-serif';ctx.fillText('(Inventory < 20%)',w/2,H/2+15);}canvas.onclick=(evt)=>{if(state.inv<CONFIG.MIN_INVENTORY_PCT)return;const rect=canvas.getBoundingClientRect();const cx=evt.clientX-rect.left;const cy=evt.clientY-rect.top;for(let i=0;i<chartBarRects.length;i++){const r=chartBarRects[i];if(cx>=r.x&&cx<=r.x+r.w&&cy>=r.y&&cy<=r.y+r.h){state.band=r.step;update();const tr=document.querySelector(`tr[data-step="${r.step}"]`);if(tr)tr.scrollIntoView({behavior:'smooth',block:'nearest'});break;}}};}
+function updateTable(){const tbody=document.getElementById('tableBody');tbody.innerHTML='';const exposures=[0,20,40,60,80];for(let s=0;s<CONFIG.BANDS;s++){const row=document.createElement('tr');row.dataset.step=String(s);if(s===state.band)row.className='highlight';const bandCell=document.createElement('td');bandCell.textContent=bandLabel(s,state.T);row.appendChild(bandCell);exposures.forEach((icp)=>{const cell=document.createElement('td');const pct=(icp===0)?50:Math.round(bandPercent(s,icp));cell.textContent=pct+'%';row.appendChild(cell);});row.addEventListener('click',()=>{state.band=s;update();});tbody.appendChild(row);}}
+function updateNumbers(){const pctInt=Math.round(bandPercent(state.band,state.inv));const your=state.T*(pctInt/100);const client=state.T-your;document.getElementById('yourValue').textContent=fmt(your);document.getElementById('clientValue').textContent=fmt(client);document.getElementById('yourBar').style.width=`${pctInt}%`;document.getElementById('yourBar').textContent=`Fareplace ${pctInt}%`;document.getElementById('clientBar').textContent=`Client ${Math.max(0,100-pctInt)}%`;}
+function recomputeAccumulation(){const bandsCount=state.band+1;const gross=bandsCount*state.T;let yourTotal=0,clientTotal=0;const details=[];for(let s=0;s<=state.band;s++){const pct=Math.round(bandPercent(s,state.inv));const your=Math.round(state.T*(pct/100));const their=Math.round(state.T-your);yourTotal+=your;clientTotal+=their;const lbl=(s===0)?`≤ ${fmt(state.T)}`:`${fmt(s*state.T+1)} – ${fmt((s+1)*state.T)}`;details.push({s,pct,your,their,lbl});}return{gross,yourTotal,clientTotal,details};}
+function updateAccumTotals(){const {gross,yourTotal,clientTotal,details}=recomputeAccumulation();const license=(state.inv<CONFIG.MIN_INVENTORY_PCT)?Math.round(state.T*(CONFIG.LICENSE_FEE_PCT_OF_T/100)):0;const licenseBadge=document.getElementById('licenseBadge');licenseBadge.innerHTML=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'⚠️ License fee applied!':'✅ License fee is waived!';licenseBadge.className=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'on':'off';const yourInclLicense=yourTotal+license;const licenseLine=document.getElementById('licenseLine');const licenseNote=document.getElementById('licenseNote');if(license>0){licenseNote.style.display='block';}else{licenseNote.style.display='none';}document.getElementById('accGross').textContent=fmt(gross);document.getElementById('accClient').textContent=fmt(clientTotal);document.getElementById('accYourRev').textContent=fmt(yourTotal);document.getElementById('accLicense').textContent=fmt(license);document.getElementById('accYourTotal').textContent=fmt(yourInclLicense);}
+function update(){state.inv=parseInt(document.getElementById('invSlider').value,10)||0;document.getElementById('invDisplay').textContent=state.inv;const licenseBadge=document.getElementById('licenseBadge');licenseBadge.innerHTML=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'⚠️ License fee applied ':'✅ License fee waived';licenseBadge.className=(state.inv<CONFIG.MIN_INVENTORY_PCT)?'on':'off';const chartLabel=document.getElementById('discountChartLabel');const chartCanvas=document.getElementById('discountChart');if(state.inv===0){chartLabel.style.display='none';chartCanvas.style.opacity='0.3';chartCanvas.style.pointerEvents='none';}else{chartLabel.style.display='block';chartLabel.textContent=`Per-step discount from ${CONFIG.BASE_MAX_SHARE_PCT}% (current inventory)`;chartCanvas.style.opacity='1';chartCanvas.style.pointerEvents='auto';}positionHandles();updateNumbers();updateTable();drawDiscountChart();updateAccumTotals();}
+function onTargetFocus(){const el=document.getElementById('target');const raw=(el.value||'').replace(/[^\d]/g,'');el.value=raw;}
+function onTargetChangeManual(){const t=document.getElementById('target');const raw=(t.value||'').replace(/[^\d]/g,'');let value=raw?parseInt(raw,10):200000;value=Math.max(200000,value);value=Math.round(value/200000)*200000;state.T=value;t.value='$'+state.T.toLocaleString();updateButtonStates();update();}
+function incrementTarget(){let value=state.T+200000;state.T=value;document.getElementById('target').value='$'+state.T.toLocaleString();updateButtonStates();update();}
+function decrementTarget(){let value=Math.max(200000,state.T-200000);state.T=value;document.getElementById('target').value='$'+state.T.toLocaleString();updateButtonStates();update();}
+function updateButtonStates(){const downBtn=document.getElementById('targetDown');downBtn.disabled=state.T<=200000;}
+window.addEventListener('DOMContentLoaded',()=>{const t=document.getElementById('target');t.addEventListener('focus',onTargetFocus);t.addEventListener('blur',onTargetChangeManual);t.addEventListener('keydown',(e)=>{if(e.key==='Enter'){onTargetChangeManual();t.blur();}});t.value='$'+state.T.toLocaleString();document.getElementById('targetUp').addEventListener('click',incrementTarget);document.getElementById('targetDown').addEventListener('click',decrementTarget);updateButtonStates();document.getElementById('invSlider').addEventListener('input',update);const ticks=document.getElementById('ticks');for(let i=0;i<=CONFIG.UI_MAX_STEPS;i++){const span=document.createElement('span');ticks.appendChild(span);}update();setTimeout(()=>{const rail=document.getElementById('rail');const startThumb=document.getElementById('thumbStart');const endThumb=document.getElementById('thumbCurrent');const onMoveStart=(e)=>{const rect=rail.getBoundingClientRect();const px=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;const w=rect.width;const b=Math.min(Math.max(Math.round((px/w)*CONFIG.UI_MAX_STEPS),0),CONFIG.UI_MAX_STEPS-1);state.band=b;update();};const onMoveEnd=(e)=>{const rect=rail.getBoundingClientRect();const px=(e.touches?e.touches[0].clientX:e.clientX)-rect.left;const w=rect.width;let k=Math.round((px/w)*CONFIG.UI_MAX_STEPS);if(k<1)k=1;if(k>CONFIG.UI_MAX_STEPS)k=CONFIG.UI_MAX_STEPS;state.band=Math.min(Math.max(k-1,0),CONFIG.UI_MAX_STEPS-1);update();};function drag(el,handler){let dragging=false;const down=(e)=>{dragging=true;e.preventDefault();};const up=()=>{dragging=false;};const move=(e)=>{if(!dragging)return;handler(e);} ;el.addEventListener('mousedown',down);window.addEventListener('mouseup',up);window.addEventListener('mousemove',move);el.addEventListener('touchstart',down,{passive:false});window.addEventListener('touchend',up);window.addEventListener('touchmove',move,{passive:false});}
+drag(startThumb,onMoveStart);drag(endThumb,onMoveEnd);rail.addEventListener('click',(e)=>{const rect=rail.getBoundingClientRect();const px=e.clientX-rect.left;const w=rect.width;let k=Math.round((px/w)*CONFIG.UI_MAX_STEPS);if(k===0)state.band=0;else state.band=Math.min(Math.max(k-1,0),CONFIG.UI_MAX_STEPS-1);update();});},0);});window.addEventListener('resize',()=>{update();});
+</script>
 </body>
 </html>
